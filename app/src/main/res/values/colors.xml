@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base colors that might be used if dynamic theming is not fully applied or for specific components -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Material You dynamic color placeholders (actual values will be generated at runtime) -->
+    <!-- These are more for reference or if you need to override specific Material You tokens -->
+    <!-- It's generally better to use theme attributes like ?attr/colorPrimary -->
+
+    <!-- Example semantic colors (optional, can be defined in themes.xml using Material attributes) -->
+    <color name="status_bar_color">@color/purple_700</color> <!-- Example, will be overridden by Material You -->
+    <color name="app_background">@color/white</color> <!-- Example, will be overridden by Material You -->
+
+    <!-- Specific UI element colors if needed, e.g., for non-Material components or custom views -->
+    <color name="image_placeholder_background">#FFE0E0E0</color> <!-- Light gray for image placeholders -->
+</resources>

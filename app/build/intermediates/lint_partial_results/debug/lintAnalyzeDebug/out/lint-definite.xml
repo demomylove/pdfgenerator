@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.3.2" type="incidents">
+
+    <incident
+        id="RedundantLabel"
+        severity="warning"
+        message="Redundant label can be removed">
+        <fix-attribute
+            description="Delete label"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="label"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*manifest*0}"
+            line="33"
+            column="13"
+            startOffset="1618"
+            endLine="33"
+            endColumn="45"
+            endOffset="1650"/>
+    </incident>
+
+    <incident
+        id="MonochromeLauncherIcon"
+        severity="warning"
+        message="The application adaptive icon is missing a monochrome tag">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26/ic_launcher.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="5"
+            endColumn="17"
+            endOffset="272"/>
+    </incident>
+
+    <incident
+        id="MonochromeLauncherIcon"
+        severity="warning"
+        message="The application adaptive roundIcon is missing a monochrome tag">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26/ic_launcher_round.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="5"
+            endColumn="17"
+            endOffset="272"/>
+    </incident>
+
+    <incident
+        id="TypographyEllipsis"
+        severity="warning"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?">
+        <fix-replace
+            description="Replace with …"
+            oldString="..."
+            replacement="…"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="10"
+            column="33"
+            startOffset="418"
+            endLine="10"
+            endColumn="48"
+            endOffset="433"/>
+    </incident>
+
+    <incident
+        id="PluralsCandidate"
+        severity="warning"
+        message="Formatting %d followed by words (&quot;images&quot;): This should probably be a plural rather than a string">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="14"
+            column="5"
+            startOffset="668"
+            endLine="14"
+            endColumn="69"
+            endOffset="732"/>
+    </incident>
+
+    <incident
+        id="TypographyEllipsis"
+        severity="warning"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?">
+        <fix-replace
+            description="Replace with …"
+            oldString="..."
+            replacement="…"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="38"
+            column="40"
+            startOffset="2282"
+            endLine="38"
+            endColumn="62"
+            endOffset="2304"/>
+    </incident>
+
+    <incident
+        id="TypographyEllipsis"
+        severity="warning"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?">
+        <fix-replace
+            description="Replace with …"
+            oldString="..."
+            replacement="…"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="60"
+            column="40"
+            startOffset="3482"
+            endLine="60"
+            endColumn="59"
+            endOffset="3501"/>
+    </incident>
+
+    <incident
+        id="TypographyEllipsis"
+        severity="warning"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?">
+        <fix-replace
+            description="Replace with …"
+            oldString="..."
+            replacement="…"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="68"
+            column="28"
+            startOffset="3832"
+            endLine="68"
+            endColumn="38"
+            endOffset="3842"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkClientTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/com.google.http-client/google-http-client/1.42.3/e0feb1bd93ad9fb1e064706cff96e32b41a57b9c/google-http-client-1.42.3.jar"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkServerTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/com.google.http-client/google-http-client/1.42.3/e0feb1bd93ad9fb1e064706cff96e32b41a57b9c/google-http-client-1.42.3.jar"/>
+    </incident>
+
+    <incident
+        id="OldTargetApi"
+        severity="warning"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details.">
+        <fix-replace
+            description="Update targetSdkVersion to 34"
+            oldString="33"
+            replacement="34"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="17"
+            column="9"
+            startOffset="558"
+            endLine="17"
+            endColumn="23"
+            endOffset="572"/>
+    </incident>
+
+    <incident
+        id="UseTomlInstead"
+        severity="warning"
+        message="Use version catalog instead">
+        <fix-composite
+            description="Replace with new library catalog declaration for http-client-google-http-client-gson"
+            robot="true">
+            <fix-replace
+                description="Replace with googleHttpClientGsonVersion = &quot;1.42.3&quot;..."
+                robot="true"
+                oldString="_lint_insert_begin_"
+                replacement="googleHttpClientGsonVersion = &quot;1.42.3&quot;&#xA;">
+                <range
+                    file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+                    startOffset="79"
+                    endOffset="79"/>
+            </fix-replace>
+            <fix-replace
+                description="Replace with http-client-google-http-client-gson = { module = &quot;com.google.http-client:google-http-client-gson&quot;, version.ref = &quot;googleHttpClientGsonVersion&quot; }..."
+                robot="true"
+                oldString="_lint_insert_begin_"
+                replacement="http-client-google-http-client-gson = { module = &quot;com.google.http-client:google-http-client-gson&quot;, version.ref = &quot;googleHttpClientGsonVersion&quot; }&#xA;">
+                <range
+                    file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+                    startOffset="2926"
+                    endOffset="2926"/>
+            </fix-replace>
+            <fix-replace
+                description="Replace with libs.http.client.google.http.client.gson"
+                robot="true"
+                replacement="libs.http.client.google.http.client.gson">
+                <range
+                    file="${:app*projectDir}/build.gradle.kts"
+                    startOffset="4751"
+                    endOffset="4806"/>
+            </fix-replace>
+        </fix-composite>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="129"
+            column="21"
+            startOffset="4752"
+            endLine="129"
+            endColumn="74"
+            endOffset="4805"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.16.0">
+        <fix-replace
+            description="Change to 1.16.0"
+            family="Update versions"
+            oldString="1.12.0"
+            replacement="1.16.0"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="8"
+            column="11"
+            startOffset="331"
+            endLine="8"
+            endColumn="19"
+            endOffset="339"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.8.7">
+        <fix-replace
+            description="Change to 2.8.7"
+            family="Update versions"
+            oldString="2.7.0"
+            replacement="2.8.7"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="9"
+            column="23"
+            startOffset="362"
+            endLine="9"
+            endColumn="30"
+            endOffset="369"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.7.0 is available: 2.8.7">
+        <fix-replace
+            description="Change to 2.8.7"
+            family="Update versions"
+            oldString="2.7.0"
+            replacement="2.8.7"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="10"
+            column="29"
+            startOffset="398"
+            endLine="10"
+            endColumn="36"
+            endOffset="405"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.activity:activity-compose than 1.9.0 is available: 1.10.1">
+        <fix-replace
+            description="Change to 1.10.1"
+            family="Update versions"
+            oldString="1.9.0"
+            replacement="1.10.1"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="11"
+            column="19"
+            startOffset="424"
+            endLine="11"
+            endColumn="26"
+            endOffset="431"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.compose:compose-bom than 2024.04.01 is available: 2025.04.01">
+        <fix-replace
+            description="Change to 2025.04.01"
+            family="Update versions"
+            oldString="2024.04.01"
+            replacement="2025.04.01"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="12"
+            column="14"
+            startOffset="445"
+            endLine="12"
+            endColumn="26"
+            endOffset="457"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.navigation:navigation-compose than 2.7.7 is available: 2.8.9">
+        <fix-replace
+            description="Change to 2.8.9"
+            family="Update versions"
+            oldString="2.7.7"
+            replacement="2.8.9"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="14"
+            column="21"
+            startOffset="574"
+            endLine="14"
+            endColumn="28"
+            endOffset="581"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-core than 1.3.3 is available: 1.4.2">
+        <fix-replace
+            description="Change to 1.4.2"
+            family="Update versions"
+            oldString="1.3.3"
+            replacement="1.4.2"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="19"
+            column="11"
+            startOffset="647"
+            endLine="19"
+            endColumn="18"
+            endOffset="654"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-camera2 than 1.3.3 is available: 1.4.2">
+        <fix-replace
+            description="Change to 1.4.2"
+            family="Update versions"
+            oldString="1.3.3"
+            replacement="1.4.2"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="19"
+            column="11"
+            startOffset="647"
+            endLine="19"
+            endColumn="18"
+            endOffset="654"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-lifecycle than 1.3.3 is available: 1.4.2">
+        <fix-replace
+            description="Change to 1.4.2"
+            family="Update versions"
+            oldString="1.3.3"
+            replacement="1.4.2"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="19"
+            column="11"
+            startOffset="647"
+            endLine="19"
+            endColumn="18"
+            endOffset="654"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-view than 1.3.3 is available: 1.4.2">
+        <fix-replace
+            description="Change to 1.4.2"
+            family="Update versions"
+            oldString="1.3.3"
+            replacement="1.4.2"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="19"
+            column="11"
+            startOffset="647"
+            endLine="19"
+            endColumn="18"
+            endOffset="654"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-extensions than 1.3.3 is available: 1.4.2">
+        <fix-replace
+            description="Change to 1.4.2"
+            family="Update versions"
+            oldString="1.3.3"
+            replacement="1.4.2"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="19"
+            column="11"
+            startOffset="647"
+            endLine="19"
+            endColumn="18"
+            endOffset="654"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.android.billingclient:billing-ktx than 6.2.0 is available: 7.1.1">
+        <fix-replace
+            description="Change to 7.1.1"
+            family="Update versions"
+            oldString="6.2.0"
+            replacement="7.1.1"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="23"
+            column="15"
+            startOffset="686"
+            endLine="23"
+            endColumn="22"
+            endOffset="693"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.google.android.gms:play-services-ads than 23.0.0 is available: 24.2.0">
+        <fix-replace
+            description="Change to 24.2.0"
+            family="Update versions"
+            oldString="23.0.0"
+            replacement="24.2.0"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="24"
+            column="19"
+            startOffset="712"
+            endLine="24"
+            endColumn="27"
+            endOffset="720"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.1.5">
+        <fix-replace
+            description="Change to 1.1.5"
+            family="Update versions"
+            oldString="1.1.1"
+            replacement="1.1.5"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="26"
+            column="24"
+            startOffset="745"
+            endLine="26"
+            endColumn="31"
+            endOffset="752"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.google.android.gms:play-services-auth than 21.0.0 is available: 21.3.0">
+        <fix-replace
+            description="Change to 21.3.0"
+            family="Update versions"
+            oldString="21.0.0"
+            replacement="21.3.0"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="28"
+            column="20"
+            startOffset="845"
+            endLine="28"
+            endColumn="28"
+            endOffset="853"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.2.1">
+        <fix-replace
+            description="Change to 1.2.1"
+            family="Update versions"
+            oldString="1.1.5"
+            replacement="1.2.1"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="33"
+            column="24"
+            startOffset="1106"
+            endLine="33"
+            endColumn="31"
+            endOffset="1113"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.6.1">
+        <fix-replace
+            description="Change to 3.6.1"
+            family="Update versions"
+            oldString="3.5.1"
+            replacement="3.6.1"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="34"
+            column="16"
+            startOffset="1129"
+            endLine="34"
+            endColumn="23"
+            endOffset="1136"/>
+    </incident>
+
+    <incident
+        id="AndroidGradlePluginVersion"
+        severity="warning"
+        message="A newer version of com.android.application than 8.3.2 is available: 8.9.2">
+        <fix-replace
+            description="Change to 8.9.2"
+            family="Update versions"
+            oldString="8.3.2"
+            replacement="8.9.2"/>
+        <location
+            file="$HOME/IdeaProject/pdfGenerator/gradle/libs.versions.toml"
+            line="2"
+            column="23"
+            startOffset="33"
+            endLine="2"
+            endColumn="30"
+            endOffset="40"/>
+    </incident>
+
+</incidents>

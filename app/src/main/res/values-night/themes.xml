@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme for night mode. -->
+    <style name="Theme.PdfGenerator" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <!-- For Material 3, primary, secondary, tertiary colors are typically derived dynamically -->
+        <!-- <item name="colorPrimary">@color/purple_200</item> --> <!-- Example for dark theme -->
+        <!-- <item name="colorPrimaryVariant">@color/purple_700</item> -->
+        <!-- <item name="colorOnPrimary">@color/black</item> -->
+        <!-- Secondary brand color. -->
+        <!-- <item name="colorSecondary">@color/teal_200</item> -->
+        <!-- <item name="colorSecondaryVariant">@color/teal_200</item> -->
+        <!-- <item name="colorOnSecondary">@color/black</item> -->
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item> <!-- Use false for dark status bar icons if colorSurface is dark -->
+        <!-- Navigation bar color (Material 3 often uses transparent or surface color) -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item> <!-- Use false for dark navigation bar icons -->
+
+        <!-- Customize your theme here. -->
+    </style>
+</resources>

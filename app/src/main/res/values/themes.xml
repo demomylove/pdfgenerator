@@ -1,0 +1,53 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.PdfGenerator" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <!-- For Material 3, primary, secondary, tertiary colors are typically derived dynamically -->
+        <!-- <item name="colorPrimary">@color/purple_500</item> -->
+        <!-- <item name="colorPrimaryVariant">@color/purple_700</item> -->
+        <!-- <item name="colorOnPrimary">@color/white</item> -->
+        <!-- Secondary brand color. -->
+        <!-- <item name="colorSecondary">@color/teal_200</item> -->
+        <!-- <item name="colorSecondaryVariant">@color/teal_700</item> -->
+        <!-- <item name="colorOnSecondary">@color/black</item> -->
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item> <!-- Or ?attr/colorPrimary for a colored status bar -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item> <!-- Use true for light status bar icons if colorSurface is light -->
+        <!-- Navigation bar color (Material 3 often uses transparent or surface color) -->
+        <item name="android:navigationBarColor">@android:color/transparent</item> <!-- Or ?attr/colorSurface for a solid color -->
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item> <!-- Use true for light navigation bar icons -->
+
+
+        <!-- Customize your theme here. -->
+        <!-- Enable Material 3 dynamic colors (requires API 31+) -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item> <!-- Let Material3 handle dark theme -->
+
+        <!-- Font family (optional, can be set per component or globally) -->
+        <!-- <item name="android:fontFamily">@font/your_font_family</item> -->
+
+        <!-- Shape appearances -->
+        <!-- Example:
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.App.SmallComponent</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.App.LargeComponent</item>
+        -->
+    </style>
+
+    <!-- Optional: Define specific shape appearances if needed -->
+    <!--
+    <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+    -->
+
+    <!-- Theme for the splash screen (if using androidx.core:core-splashscreen) -->
+    <!--
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">?attr/colorSurface</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.PdfGenerator</item>
+    </style>
+    -->
+
+</resources>

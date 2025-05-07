@@ -1,0 +1,479 @@
+/home/insanejack/IdeaProject/pdfGenerator/app/build.gradle.kts:17: Warning: Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details. [OldTargetApi]
+        targetSdk = 33 // Target Android 13 (Tiramisu) as per plan
+        ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "OldTargetApi":
+   When your application runs on a version of Android that is more recent than
+   your targetSdkVersion specifies that it has been tested with, various
+   compatibility modes kick in. This ensures that your application continues
+   to work, but it may look out of place. For example, if the targetSdkVersion
+   is less than 14, your app may get an option button in the UI.
+
+   To fix this issue, set the targetSdkVersion to the highest available value.
+   Then test your app to make sure everything works correctly. You may want to
+   consult the compatibility notes to see what changes apply to each version
+   you are adding support for:
+   https://developer.android.com/reference/android/os/Build.VERSION_CODES.html
+   as well as follow this guide:
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.
+   html
+
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.html
+
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/AndroidManifest.xml:33: Warning: Redundant label can be removed [RedundantLabel]
+            android:label="@string/app_name"
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "RedundantLabel":
+   When an activity does not have a label attribute, it will use the one from
+   the application tag. Since the application has already specified the same
+   label, the label on this activity can be omitted.
+
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:2: Warning: A newer version of com.android.application than 8.3.2 is available: 8.9.2 [AndroidGradlePluginVersion]
+androidGradlePlugin = "8.3.2" # Check for the latest stable version
+                      ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:2: Warning: A newer version of com.android.application than 8.3.2 is available: 8.9.2 [AndroidGradlePluginVersion]
+androidGradlePlugin = "8.3.2" # Check for the latest stable version
+                      ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:2: Warning: A newer version of com.android.application than 8.3.2 is available: 8.9.2 [AndroidGradlePluginVersion]
+androidGradlePlugin = "8.3.2" # Check for the latest stable version
+                      ~~~~~~~
+
+   Explanation for issues of type "AndroidGradlePluginVersion":
+   This detector looks for usage of the Android Gradle Plugin where the
+   version you are using is not the current stable release. Using older
+   versions is fine, and there are cases where you deliberately want to stick
+   with an older version. However, you may simply not be aware that a more
+   recent version is available, and that is what this lint check helps find.
+
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:8: Warning: A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.16.0 [GradleDependency]
+coreKtx = "1.12.0"
+          ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:8: Warning: A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.16.0 [GradleDependency]
+coreKtx = "1.12.0"
+          ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:8: Warning: A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.16.0 [GradleDependency]
+coreKtx = "1.12.0"
+          ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:9: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.8.7 [GradleDependency]
+lifecycleRuntimeKtx = "2.7.0"
+                      ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:9: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.8.7 [GradleDependency]
+lifecycleRuntimeKtx = "2.7.0"
+                      ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:9: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.8.7 [GradleDependency]
+lifecycleRuntimeKtx = "2.7.0"
+                      ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:10: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.7.0 is available: 2.8.7 [GradleDependency]
+lifecycleViewmodelCompose = "2.7.0"
+                            ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:10: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.7.0 is available: 2.8.7 [GradleDependency]
+lifecycleViewmodelCompose = "2.7.0"
+                            ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:10: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.7.0 is available: 2.8.7 [GradleDependency]
+lifecycleViewmodelCompose = "2.7.0"
+                            ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:11: Warning: A newer version of androidx.activity:activity-compose than 1.9.0 is available: 1.10.1 [GradleDependency]
+activityCompose = "1.9.0"
+                  ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:11: Warning: A newer version of androidx.activity:activity-compose than 1.9.0 is available: 1.10.1 [GradleDependency]
+activityCompose = "1.9.0"
+                  ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:11: Warning: A newer version of androidx.activity:activity-compose than 1.9.0 is available: 1.10.1 [GradleDependency]
+activityCompose = "1.9.0"
+                  ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:12: Warning: A newer version of androidx.compose:compose-bom than 2024.04.01 is available: 2025.04.01 [GradleDependency]
+composeBom = "2024.04.01" # Check for the latest BOM
+             ~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:12: Warning: A newer version of androidx.compose:compose-bom than 2024.04.01 is available: 2025.04.01 [GradleDependency]
+composeBom = "2024.04.01" # Check for the latest BOM
+             ~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:12: Warning: A newer version of androidx.compose:compose-bom than 2024.04.01 is available: 2025.04.01 [GradleDependency]
+composeBom = "2024.04.01" # Check for the latest BOM
+             ~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:14: Warning: A newer version of androidx.navigation:navigation-compose than 2.7.7 is available: 2.8.9 [GradleDependency]
+navigationCompose = "2.7.7"
+                    ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:14: Warning: A newer version of androidx.navigation:navigation-compose than 2.7.7 is available: 2.8.9 [GradleDependency]
+navigationCompose = "2.7.7"
+                    ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:14: Warning: A newer version of androidx.navigation:navigation-compose than 2.7.7 is available: 2.8.9 [GradleDependency]
+navigationCompose = "2.7.7"
+                    ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-camera2 than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-camera2 than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-camera2 than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-core than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-core than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-core than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-extensions than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-extensions than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-extensions than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-lifecycle than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-lifecycle than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-lifecycle than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-view than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-view than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:19: Warning: A newer version of androidx.camera:camera-view than 1.3.3 is available: 1.4.2 [GradleDependency]
+cameraX = "1.3.3"
+          ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:23: Warning: A newer version of com.android.billingclient:billing-ktx than 6.2.0 is available: 7.1.1 [GradleDependency]
+playBilling = "6.2.0"
+              ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:23: Warning: A newer version of com.android.billingclient:billing-ktx than 6.2.0 is available: 7.1.1 [GradleDependency]
+playBilling = "6.2.0"
+              ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:23: Warning: A newer version of com.android.billingclient:billing-ktx than 6.2.0 is available: 7.1.1 [GradleDependency]
+playBilling = "6.2.0"
+              ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:24: Warning: A newer version of com.google.android.gms:play-services-ads than 23.0.0 is available: 24.2.0 [GradleDependency]
+playServicesAds = "23.0.0"
+                  ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:24: Warning: A newer version of com.google.android.gms:play-services-ads than 23.0.0 is available: 24.2.0 [GradleDependency]
+playServicesAds = "23.0.0"
+                  ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:24: Warning: A newer version of com.google.android.gms:play-services-ads than 23.0.0 is available: 24.2.0 [GradleDependency]
+playServicesAds = "23.0.0"
+                  ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:26: Warning: A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.1.5 [GradleDependency]
+datastorePreferences = "1.1.1"
+                       ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:26: Warning: A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.1.5 [GradleDependency]
+datastorePreferences = "1.1.1"
+                       ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:26: Warning: A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.1.5 [GradleDependency]
+datastorePreferences = "1.1.1"
+                       ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:28: Warning: A newer version of com.google.android.gms:play-services-auth than 21.0.0 is available: 21.3.0 [GradleDependency]
+playServicesAuth = "21.0.0" # Check for latest version
+                   ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:28: Warning: A newer version of com.google.android.gms:play-services-auth than 21.0.0 is available: 21.3.0 [GradleDependency]
+playServicesAuth = "21.0.0" # Check for latest version
+                   ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:28: Warning: A newer version of com.google.android.gms:play-services-auth than 21.0.0 is available: 21.3.0 [GradleDependency]
+playServicesAuth = "21.0.0" # Check for latest version
+                   ~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:33: Warning: A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.2.1 [GradleDependency]
+androidxTestExtJunit = "1.1.5"
+                       ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:33: Warning: A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.2.1 [GradleDependency]
+androidxTestExtJunit = "1.1.5"
+                       ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:33: Warning: A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.2.1 [GradleDependency]
+androidxTestExtJunit = "1.1.5"
+                       ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:34: Warning: A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.6.1 [GradleDependency]
+espressoCore = "3.5.1"
+               ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:34: Warning: A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.6.1 [GradleDependency]
+espressoCore = "3.5.1"
+               ~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/gradle/libs.versions.toml:34: Warning: A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.6.1 [GradleDependency]
+espressoCore = "3.5.1"
+               ~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:14: Warning: Formatting %d followed by words ("images"): This should probably be a plural rather than a string [PluralsCandidate]
+    <string name="selected_images_count">%d images selected</string>
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "PluralsCandidate":
+   This lint check looks for potential errors in internationalization where
+   you have translated a message which involves a quantity and it looks like
+   other parts of the string may need grammatical changes.
+
+   For example, rather than something like this:
+     <string name="try_again">Try again in %d seconds.</string>
+   you should be using a plural:
+      <plurals name="try_again">
+           <item quantity="one">Try again in %d second</item>
+           <item quantity="other">Try again in %d seconds</item>
+       </plurals>
+   This will ensure that in other languages the right set of translations are
+   provided for the different quantity classes.
+
+   (This check depends on some heuristics, so it may not accurately determine
+   whether a string really should be a quantity. You can use tools:ignore to
+   filter out false positives.
+
+   https://developer.android.com/guide/topics/resources/string-resource.html#Plurals
+
+/home/insanejack/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client/1.42.3/e0feb1bd93ad9fb1e064706cff96e32b41a57b9c/google-http-client-1.42.3.jar: Warning: checkClientTrusted is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers [TrustAllX509TrustManager]
+/home/insanejack/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client/1.42.3/e0feb1bd93ad9fb1e064706cff96e32b41a57b9c/google-http-client-1.42.3.jar: Warning: checkServerTrusted is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers [TrustAllX509TrustManager]
+
+   Explanation for issues of type "TrustAllX509TrustManager":
+   This check looks for X509TrustManager implementations whose
+   checkServerTrusted or checkClientTrusted methods do nothing (thus trusting
+   any certificate chain) which could result in insecure network traffic
+   caused by trusting arbitrary TLS/SSL certificates presented by peers.
+
+   https://goo.gle/TrustAllX509TrustManager
+
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values-night/themes.xml:14: Warning: Unnecessary; SDK_INT is always >= 21 [ObsoleteSdkInt]
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item>
+                                            ~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/themes.xml:14: Warning: Unnecessary; SDK_INT is always >= 21 [ObsoleteSdkInt]
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item> <!-- Or ?attr/colorPrimary for a colored status bar -->
+                                            ~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values-night/themes.xml:15: Warning: Unnecessary; SDK_INT is always >= 23 [ObsoleteSdkInt]
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item> <!-- Use false for dark status bar icons if colorSurface is dark -->
+                                                  ~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/themes.xml:15: Warning: Unnecessary; SDK_INT is always >= 23 [ObsoleteSdkInt]
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item> <!-- Use true for light status bar icons if colorSurface is light -->
+                                                  ~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:4: Warning: The resource R.color.purple_200 appears to be unused [UnusedResources]
+    <color name="purple_200">#FFBB86FC</color>
+           ~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:5: Warning: The resource R.color.purple_500 appears to be unused [UnusedResources]
+    <color name="purple_500">#FF6200EE</color>
+           ~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:6: Warning: The resource R.color.purple_700 appears to be unused [UnusedResources]
+    <color name="purple_700">#FF3700B3</color>
+           ~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:7: Warning: The resource R.color.teal_200 appears to be unused [UnusedResources]
+    <color name="teal_200">#FF03DAC5</color>
+           ~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:8: Warning: The resource R.color.teal_700 appears to be unused [UnusedResources]
+    <color name="teal_700">#FF018786</color>
+           ~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:9: Warning: The resource R.color.black appears to be unused [UnusedResources]
+    <color name="black">#FF000000</color>
+           ~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:10: Warning: The resource R.color.white appears to be unused [UnusedResources]
+    <color name="white">#FFFFFFFF</color>
+           ~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:17: Warning: The resource R.color.status_bar_color appears to be unused [UnusedResources]
+    <color name="status_bar_color">@color/purple_700</color> <!-- Example, will be overridden by Material You -->
+           ~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:18: Warning: The resource R.color.app_background appears to be unused [UnusedResources]
+    <color name="app_background">@color/white</color> <!-- Example, will be overridden by Material You -->
+           ~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/colors.xml:21: Warning: The resource R.color.image_placeholder_background appears to be unused [UnusedResources]
+    <color name="image_placeholder_background">#FFE0E0E0</color> <!-- Light gray for image placeholders -->
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/drawable/ic_pdf_file.xml:2: Warning: The resource R.drawable.ic_pdf_file appears to be unused [UnusedResources]
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+^
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:6: Warning: The resource R.string.title_activity_main appears to be unused [UnusedResources]
+    <string name="title_activity_main">PDF Generator</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:15: Warning: The resource R.string.preview_image appears to be unused [UnusedResources]
+    <string name="preview_image">Preview Image</string>
+            ~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:17: Warning: The resource R.string.add_image appears to be unused [UnusedResources]
+    <string name="add_image">Add Image</string>
+            ~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:22: Warning: The resource R.string.permission_denied appears to be unused [UnusedResources]
+    <string name="permission_denied">Permission denied. Some features might not work.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:27: Warning: The resource R.string.premium_features_title appears to be unused [UnusedResources]
+    <string name="premium_features_title">Unlock Premium Features</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:28: Warning: The resource R.string.feature_high_quality_pdf appears to be unused [UnusedResources]
+    <string name="feature_high_quality_pdf">High Quality PDFs</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:29: Warning: The resource R.string.feature_cloud_import appears to be unused [UnusedResources]
+    <string name="feature_cloud_import">Import from Cloud (Google Drive, Dropbox)</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:30: Warning: The resource R.string.feature_custom_pdf_settings appears to be unused [UnusedResources]
+    <string name="feature_custom_pdf_settings">Custom PDF Settings (Page Size, Orientation, Compression)</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:31: Warning: The resource R.string.feature_ad_free appears to be unused [UnusedResources]
+    <string name="feature_ad_free">Ad-Free Experience</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:32: Warning: The resource R.string.purchase appears to be unused [UnusedResources]
+    <string name="purchase">Purchase</string>
+            ~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:34: Warning: The resource R.string.purchase_failed appears to be unused [UnusedResources]
+    <string name="purchase_failed">Purchase failed. Please try again.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:35: Warning: The resource R.string.purchase_pending appears to be unused [UnusedResources]
+    <string name="purchase_pending">Purchase pending.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:36: Warning: The resource R.string.already_premium appears to be unused [UnusedResources]
+    <string name="already_premium">You are already a premium user.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:37: Warning: The resource R.string.restore_purchases appears to be unused [UnusedResources]
+    <string name="restore_purchases">Restore Purchases</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:38: Warning: The resource R.string.restoring_purchases appears to be unused [UnusedResources]
+    <string name="restoring_purchases">Restoring purchases...</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:39: Warning: The resource R.string.no_purchases_to_restore appears to be unused [UnusedResources]
+    <string name="no_purchases_to_restore">No purchases found to restore.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:40: Warning: The resource R.string.purchases_restored appears to be unused [UnusedResources]
+    <string name="purchases_restored">Purchases restored successfully.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:47: Warning: The resource R.string.page_size_a4 appears to be unused [UnusedResources]
+    <string name="page_size_a4">A4</string>
+            ~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:48: Warning: The resource R.string.page_size_letter appears to be unused [UnusedResources]
+    <string name="page_size_letter">Letter</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:49: Warning: The resource R.string.page_size_legal appears to be unused [UnusedResources]
+    <string name="page_size_legal">Legal</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:50: Warning: The resource R.string.orientation_portrait appears to be unused [UnusedResources]
+    <string name="orientation_portrait">Portrait</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:51: Warning: The resource R.string.orientation_landscape appears to be unused [UnusedResources]
+    <string name="orientation_landscape">Landscape</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:52: Warning: The resource R.string.quality_high appears to be unused [UnusedResources]
+    <string name="quality_high">High (Larger file size)</string>
+            ~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:53: Warning: The resource R.string.quality_medium appears to be unused [UnusedResources]
+    <string name="quality_medium">Medium (Balanced)</string>
+            ~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:54: Warning: The resource R.string.quality_low appears to be unused [UnusedResources]
+    <string name="quality_low">Low (Smaller file size)</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:59: Warning: The resource R.string.import_from_dropbox appears to be unused [UnusedResources]
+    <string name="import_from_dropbox">Import from Dropbox</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:60: Warning: The resource R.string.connecting_to_cloud appears to be unused [UnusedResources]
+    <string name="connecting_to_cloud">Connecting to %s...</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:61: Warning: The resource R.string.error_cloud_connection appears to be unused [UnusedResources]
+    <string name="error_cloud_connection">Error connecting to cloud service.</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:62: Warning: The resource R.string.no_files_found appears to be unused [UnusedResources]
+    <string name="no_files_found">No compatible files found.</string>
+            ~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:65: Warning: The resource R.string.ok appears to be unused [UnusedResources]
+    <string name="ok">OK</string>
+            ~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:67: Warning: The resource R.string.error appears to be unused [UnusedResources]
+    <string name="error">Error</string>
+            ~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:68: Warning: The resource R.string.loading appears to be unused [UnusedResources]
+    <string name="loading">Loading...</string>
+            ~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:69: Warning: The resource R.string.coming_soon appears to be unused [UnusedResources]
+    <string name="coming_soon">Coming Soon</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:70: Warning: The resource R.string.share_pdf appears to be unused [UnusedResources]
+    <string name="share_pdf">Share PDF</string>
+            ~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:71: Warning: The resource R.string.open_pdf appears to be unused [UnusedResources]
+    <string name="open_pdf">Open PDF</string>
+            ~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:72: Warning: The resource R.string.delete_pdf appears to be unused [UnusedResources]
+    <string name="delete_pdf">Delete PDF</string>
+            ~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:73: Warning: The resource R.string.confirm_delete_pdf_title appears to be unused [UnusedResources]
+    <string name="confirm_delete_pdf_title">Confirm Delete</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:74: Warning: The resource R.string.confirm_delete_pdf_message appears to be unused [UnusedResources]
+    <string name="confirm_delete_pdf_message">Are you sure you want to delete this PDF?</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:10: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="creating_pdf">Creating PDF...</string>
+                                ~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:38: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="restoring_purchases">Restoring purchases...</string>
+                                       ~~~~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:60: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="connecting_to_cloud">Connecting to %s...</string>
+                                       ~~~~~~~~~~~~~~~~~~~
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/values/strings.xml:68: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="loading">Loading...</string>
+                           ~~~~~~~~~~
+
+   Explanation for issues of type "TypographyEllipsis":
+   You can replace the string "..." with a dedicated ellipsis character,
+   ellipsis character (u2026, &#8230;). This can help make the text more
+   readable.
+
+   https://en.wikipedia.org/wiki/Ellipsis
+
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+/home/insanejack/IdeaProject/pdfGenerator/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml:2: Warning: The application adaptive roundIcon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+
+   Explanation for issues of type "MonochromeLauncherIcon":
+   If android:roundIcon and android:icon are both in your manifest, you must
+   either remove the reference to android:roundIcon if it is not needed; or,
+   supply the monochrome icon in the drawable defined by the android:roundIcon
+   and android:icon attribute.
+
+   For example, if android:roundIcon and android:icon are both in the
+   manifest, a launcher might choose to use android:roundIcon over
+   android:icon to display the adaptive app icon. Therefore, your themed
+   application iconwill not show if your monochrome attribute is not also
+   specified in android:roundIcon.
+
+/home/insanejack/IdeaProject/pdfGenerator/app/build.gradle.kts:129: Warning: Use version catalog instead [UseTomlInstead]
+    implementation("com.google.http-client:google-http-client-gson:1.42.3") // Check for latest compatible version
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseTomlInstead":
+   If your project is using a libs.versions.toml file, you should place all
+   Gradle dependencies in the TOML file. This lint check looks for version
+   declarations outside of the TOML file and suggests moving them (and in the
+   IDE, provides a quickfix to performing the operation automatically).
+
+0 errors, 119 warnings
