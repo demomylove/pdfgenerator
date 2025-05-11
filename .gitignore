@@ -1,0 +1,47 @@
+# Android Studio / IntelliJ
+*.iml
+.gradle
+/local.properties
+/.idea/
+/captures/
+.DS_Store
+
+# Android build
+/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Kotlin
+# *.kts - Be careful with this, as it can ignore your build.gradle.kts etc.
+# *.kt - Be careful with this, as it can ignore your source files.
+# Consider more specific paths if needed, e.g. /app/build/generated/source/kapt/
+
+# Java
+# *.class (already covered by /build/)
+
+# Log files
+*.log
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild/
+
+# Google Services (e.g., google-services.json if you don't want to commit it)
+# google-services.json
+
+# Crashlytics plugin
+com_crashlytics_export_strings.xml
+
+# Generated files
+generated/
+
+# Misc
+*.lock
+*.swp
+*~
