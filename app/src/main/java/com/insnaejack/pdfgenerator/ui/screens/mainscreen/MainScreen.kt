@@ -43,9 +43,11 @@ import com.insnaejack.pdfgenerator.model.PdfSettings
 import com.insnaejack.pdfgenerator.ui.screens.settings.PdfSettingsDialog
 import com.insnaejack.pdfgenerator.ui.theme.PdfGeneratorTheme
 import com.google.accompanist.permissions.*
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -421,21 +423,44 @@ fun PermissionRationaleDialog(
 fun AdvertView(modifier: Modifier = Modifier) {
     // Use a test ad unit ID for development. Replace with your actual ad unit ID for production.
     // Test Ad Unit ID for Banner: ca-app-pub-3940256099942544/6300978111
-    val adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test ID
+    val adUnitId = "ca-app-pub-6349011183583557/3269618989" // Your Ad Unit ID
     AndroidView(
         modifier = modifier.height(50.dp), // Standard banner height
         factory = { context ->
             AdView(context).apply {
-                setAdSize(AdSize.BANNER) // Or AdSize.FULL_BANNER, AdSize.LARGE_BANNER, etc.
-                // setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, AdSize.FULL_WIDTH)) // Adaptive banner
+                setAdSize(AdSize.BANNER)
                 this.adUnitId = adUnitId
+                adListener = object : AdListener() {
+                    override fun onAdLoaded() {
+                        Log.d("AdvertView", "Ad loaded successfully.")
+                    }
+
+                    override fun onAdFailedToLoad(adError: LoadAdError) {
+                        Log.e("AdvertView", "Ad failed to load: ${adError.message} (Code: ${adError.code})")
+                        Log.e("AdvertView", "Domain: ${adError.domain}, Cause: ${adError.cause}")
+                        adError.responseInfo?.let {
+                            Log.e("AdvertView", "Response Info: ${it.mediationAdapterClassName} - ${it.responseId}")
+                        }
+                    }
+
+                    override fun onAdOpened() {
+                        Log.d("AdvertView", "Ad opened.")
+                    }
+
+                    override fun onAdClicked() {
+                        Log.d("AdvertView", "Ad clicked.")
+                    }
+
+                    override fun onAdClosed() {
+                        Log.d("AdvertView", "Ad closed.")
+                    }
+                }
                 loadAd(AdRequest.Builder().build())
             }
         },
         update = { adView ->
-            // You can update the AdView here if needed, e.g., on configuration changes
-            // For banner ads, usually not much to update unless you're changing adUnitId or AdSize dynamically
-            Log.d("AdvertView", "AdView updated or recomposed")
+            Log.d("AdvertView", "AdView updated or recomposed. Current adUnitId: ${adView.adUnitId}")
+            // Consider re-calling loadAd if essential properties change, though typically not needed for banners.
         }
     )
 }

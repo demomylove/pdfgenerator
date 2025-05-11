@@ -41,7 +41,7 @@
         <!-- For Google AdMob -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/> <!-- TODO: Replace with actual AdMob App ID -->
+            android:value="ca-app-pub-6349011183583557~1643893736"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
