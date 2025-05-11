@@ -7,7 +7,7 @@
 .DS_Store
 
 # Android build
-/build/
+build/
 *.apk
 *.aab
 *.ap_
