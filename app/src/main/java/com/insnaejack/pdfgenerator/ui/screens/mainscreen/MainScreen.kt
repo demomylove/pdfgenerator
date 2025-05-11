@@ -149,13 +149,20 @@ fun MainScreen(
     }
 
     LaunchedEffect(triggerGalleryLaunch) {
+        Log.d("GalleryLaunchEffect", "triggerGalleryLaunch changed: $triggerGalleryLaunch")
         if (triggerGalleryLaunch) {
-            if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) {
+            Log.d("GalleryLaunchEffect", "Triggering gallery launch.")
+            val photoPickerAvailable = ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)
+            Log.d("GalleryLaunchEffect", "Is Photo Picker Available: $photoPickerAvailable")
+            if (photoPickerAvailable) {
+                Log.d("GalleryLaunchEffect", "Launching PickVisualMedia.")
                 pickMultipleMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             } else {
+                Log.d("GalleryLaunchEffect", "Photo Picker not available. Launching GetMultipleContents.")
                 getContentLauncher.launch("image/*")
             }
             viewModel.onGalleryLaunchTriggered()
+            Log.d("GalleryLaunchEffect", "Called onGalleryLaunchTriggered to reset flag.")
         }
     }
 
@@ -253,10 +260,20 @@ fun MainScreen(
 
                 Button(
                     onClick = {
+                        Log.d("GalleryClick", "Select from Gallery clicked.")
                         when {
-                            storagePermissionsState.allPermissionsGranted -> viewModel.onSelectFromGalleryClicked(true)
-                            storagePermissionsState.permissions.any { it.status.shouldShowRationale } -> showStorageRationaleDialog = true
-                            else -> storagePermissionsState.launchMultiplePermissionRequest()
+                            storagePermissionsState.allPermissionsGranted -> {
+                                Log.d("GalleryClick", "Permissions GRANTED. Calling viewModel.onSelectFromGalleryClicked(true)")
+                                viewModel.onSelectFromGalleryClicked(true)
+                            }
+                            storagePermissionsState.permissions.any { it.status.shouldShowRationale } -> {
+                                Log.d("GalleryClick", "Permissions RATIONALE. Showing dialog.")
+                                showStorageRationaleDialog = true
+                            }
+                            else -> {
+                                Log.d("GalleryClick", "Permissions NOT GRANTED. Launching request.")
+                                storagePermissionsState.launchMultiplePermissionRequest()
+                            }
                         }
                     },
                     modifier = Modifier.weight(1f).padding(start = 8.dp),

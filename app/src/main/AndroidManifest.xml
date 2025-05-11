@@ -10,6 +10,8 @@
     <!-- For older versions, or for media files -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" tools:ignore="ScopedStorage" />
+    <!-- For Android 13 (API level 33) and higher, for accessing images -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <!-- Google Play Billing -->
     <uses-permission android:name="com.android.vending.BILLING" />
 
@@ -45,7 +47,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.insnaejack.pdfgenerator.provider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
