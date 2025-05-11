@@ -1,4 +1,0 @@
-#Wed May 07 00:00:12 CST 2025
-base.0=/home/insanejack/IdeaProject/pdfGenerator/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-renamed.0=classes.dex
-path.0=classes.dex
