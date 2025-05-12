@@ -67,11 +67,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.CircularProgressIndicator // For loading in dialog
 
+/**
+ * Creates a temporary image file in the external cache directory.
+ * Used for storing the image captured by the camera before processing.
+ * @return A File object representing the created image file.
+ */
 fun Context.createImageFile(): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val imageFileName = "JPEG_" + timeStamp + "_"
     return File.createTempFile(imageFileName, ".jpg", externalCacheDir)
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -82,6 +88,15 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
+/**
+ * The main screen composable for the PDF Generator application.
+ * Handles user interactions for selecting images (camera, gallery, Google Drive),
+ * managing permissions, displaying selected images, initiating PDF creation,
+ * handling premium upgrades, and displaying ads for non-premium users.
+ *
+ * @param navController The NavController for navigating between screens.
+ * @param viewModel The [MainScreenViewModel] instance providing data and handling logic.
+ */
 
     val cameraPermissionState = rememberPermissionState(permission = viewModel.cameraPermission)
     val storagePermissionsState = rememberMultiplePermissionsState(permissions = viewModel.storagePermissions)
@@ -97,6 +112,11 @@ fun MainScreen(
     val isCreatingPdf by viewModel.isCreatingPdf.collectAsState()
 
     val premiumProductDetailsMap by viewModel.premiumProductDetails.collectAsState()
+/**
+     * Observes purchase updates from the BillingClientWrapper.
+     * Handles successful purchases, cancellations, and errors, providing user feedback via Toasts.
+     * Refreshes premium status upon successful purchase.
+     */
     val isPremiumUser by viewModel.isPremiumUser.collectAsState()
     val premiumProduct = premiumProductDetailsMap[ProductIds.PREMIUM_UPGRADE_ID]
 val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
@@ -117,16 +137,41 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                         }
                     }
                     BillingClient.BillingResponseCode.USER_CANCELED -> {
+/**
+     * ActivityResultLauncher for the camera intent (TakePicture contract).
+     * Handles the result of taking a picture:
+     * - If successful, adds the captured image URI (obtained from ViewModel) to the selected list.
+     * - If unsuccessful (e.g., user cancelled), resets the temporary camera image URI in the ViewModel.
+     */
                         Toast.makeText(context, "Purchase cancelled", Toast.LENGTH_SHORT).show()
                     }
                     else -> {
                         Toast.makeText(context, "Purchase failed: ${billingResult.debugMessage}", Toast.LENGTH_LONG).show()
                     }
+/**
+     * ActivityResultLauncher for picking multiple visual media (PickMultipleVisualMedia contract).
+     * Handles the result of selecting images from the photo picker (if available).
+     * - If URIs are returned, adds them to the ViewModel's selected image list.
+     */
                 }
                 viewModel.billingClientWrapper.consumePurchaseUpdateEvent()
             }
+/**
+     * ActivityResultLauncher for getting multiple contents (GetMultipleContents contract).
+     * This is a fallback for when the photo picker (PickVisualMedia) is not available.
+     * Handles the result of selecting images from the older storage access framework.
+     * - If URIs are returned, adds them to the ViewModel's selected image list.
+     */
         }
     }
+/**
+    * ActivityResultLauncher for the uCrop image cropping activity (StartActivityForResult contract).
+    * Handles the result of the cropping operation:
+    * - If successful (RESULT_OK), retrieves the cropped image URI and updates the corresponding
+    *   image URI in the ViewModel using the original URI for mapping.
+    * - If there's an error (UCrop.RESULT_ERROR), displays an error Toast.
+    * - Resets the image editing trigger in the ViewModel regardless of the outcome.
+    */
 
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
@@ -141,11 +186,22 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
 
     val pickMultipleMediaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 10),
+/**
+     * Launches the camera intent when the `triggerCameraLaunch` state in the ViewModel becomes true.
+     * Creates a temporary file, gets its content URI via FileProvider, sets it in the ViewModel,
+     * launches the `takePictureLauncher`, and resets the trigger state in the ViewModel.
+     */
         onResult = { uris ->
             if (uris.isNotEmpty()) {
                 viewModel.addSelectedImageUris(uris)
             }
         }
+/**
+     * Launches the appropriate image picker (Photo Picker or GetContent) when the
+     * `triggerGalleryLaunch` state in the ViewModel becomes true.
+     * Checks if the modern Photo Picker is available and uses it if possible, otherwise falls back
+     * to the older GetMultipleContents contract. Resets the trigger state in the ViewModel.
+     */
     )
     val getContentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents(),
@@ -158,6 +214,12 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
    val uCropLauncher = rememberLauncherForActivityResult(
        contract = ActivityResultContracts.StartActivityForResult()
    ) { result ->
+/**
+     * Observes the `pdfCreationStatus` from the ViewModel.
+     * Displays a Toast message indicating success or failure of PDF creation.
+     * If successful, clears the selected images.
+     * Consumes the status event in the ViewModel to prevent re-triggering.
+     */
        if (result.resultCode == Activity.RESULT_OK) {
            val resultUri = result.data?.let { UCrop.getOutput(it) }
            val originalUri = viewModel.imageToEditUri.value // Get the original URI that was being edited
@@ -168,6 +230,14 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
            }
        } else if (result.resultCode == UCrop.RESULT_ERROR) {
            val cropError = result.data?.let { UCrop.getError(it) }
+/**
+     * Launches the uCrop activity when an image URI is set in `imageToEditUriState`
+     * and the brightness/contrast dialog is not currently shown (`showBrightnessContrastDialogState`).
+     * This effect triggers the primary image editing (cropping, rotation) flow.
+     * Configures uCrop options (compression, controls, colors, gestures) and launches
+     * the `uCropLauncher` with the prepared intent.
+     * The ViewModel state (`imageToEditUri`) is reset within the `uCropLauncher`'s result handler.
+     */
            Toast.makeText(context, "Image cropping error: ${cropError?.message}", Toast.LENGTH_LONG).show()
            cropError?.printStackTrace()
        }
@@ -200,10 +270,22 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                 getContentLauncher.launch("image/*")
             }
             viewModel.onGalleryLaunchTriggered()
+/**
+    * Main layout structure using Scaffold.
+/**
+             * Top app bar displaying the application title centrally.
+             * Contains action buttons for clearing selection, upgrading, and accessing settings.
+             */
+    * Provides slots for top bar, bottom bar (for ads), and the main content area.
+    */
             Log.d("GalleryLaunchEffect", "Called onGalleryLaunchTriggered to reset flag.")
+// Action to clear all currently selected images.
+                        // Visible only if images are selected and PDF creation is not in progress.
         }
     }
 
+// Action to initiate the premium upgrade purchase flow.
+                        // Visible only for non-premium users when premium product details are available.
     LaunchedEffect(pdfCreationStatus) {
         pdfCreationStatus?.let { result ->
             val message = if (result.success) {
@@ -211,6 +293,7 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
             } else {
                 context.getString(R.string.error_creating_pdf, result.errorMessage ?: "Unknown error")
             }
+// Action to open the PDF Settings dialog.
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             if (result.success) {
                 viewModel.clearSelectedImages()
@@ -218,6 +301,21 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
             viewModel.consumePdfCreationStatus()
        }
    }
+/**
+             * Bottom bar containing the banner ad.
+             * Displayed only for non-premium users.
+             */
+/**
+         * Main content area of the screen.
+         * Contains the premium upgrade button (if applicable),
+         * buttons for taking photos and selecting from gallery,
+         * a button for importing from Google Drive (premium users),
+         * a display area for selected images, and the "Create PDF" button.
+         * Shows a progress indicator when PDF creation is in progress.
+         * Shows a placeholder if no images are selected.
+// Button to initiate premium purchase flow, shown prominently for non-premium users.
+                // Displays the formatted price from the product details.
+         */
 
    // Effect to launch uCrop when imageToEditUri is set and dialog is not shown
    LaunchedEffect(imageToEditUriState, showBrightnessContrastDialogState) {
@@ -228,9 +326,20 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
            val destinationFileName = "cropped_${System.currentTimeMillis()}.jpg"
            val destinationUri = Uri.fromFile(File(context.cacheDir, destinationFileName))
 
+/**
+             * Row containing the primary actions for adding images: Take Photo and Select from Gallery.
+             */
            // Configure uCrop options
            val options = UCrop.Options().apply {
                setCompressionFormat(Bitmap.CompressFormat.JPEG)
+/**
+                     * Button to initiate taking a photo.
+                     * Checks camera permission status:
+                     * - If granted, triggers camera launch via ViewModel.
+                     * - If rationale should be shown, displays the rationale dialog.
+                     * - Otherwise, requests the camera permission directly.
+                     * Disabled during PDF creation.
+                     */
                setCompressionQuality(90) // Adjust quality as needed
                setHideBottomControls(false)
                setFreeStyleCropEnabled(true)
@@ -239,6 +348,14 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                 setStatusBarColor(ContextCompat.getColor(context, R.color.purple_700)) // Example color
                 setActiveControlsWidgetColor(ContextCompat.getColor(context, R.color.teal_200)) // Example color
                 setToolbarWidgetColor(ContextCompat.getColor(context, R.color.white)) // Example color
+/**
+                     * Button to initiate selecting images from the gallery.
+                     * Checks storage permission status:
+                     * - If granted, triggers gallery launch via ViewModel.
+                     * - If rationale should be shown for any storage permission, displays the rationale dialog.
+                     * - Otherwise, requests storage permissions directly.
+                     * Disabled during PDF creation.
+                     */
                 setRootViewBackgroundColor(ContextCompat.getColor(context, R.color.black)) // Example color
 
                // Allow specific gestures
@@ -258,6 +375,10 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
            // ViewModel state is reset in the uCropLauncher result handling
        }
    }
+/**
+                 * Button to navigate to the Google Drive screen for importing images.
+                 * Visible only for premium users.
+                 */
 
 
    Scaffold(
@@ -273,6 +394,7 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                             Icon(Icons.Filled.DeleteSweep, contentDescription = "Clear selected images")
                         }
                     }
+// Display a loading indicator and text when PDF creation is in progress.
                     if (!isPremiumUser && premiumProduct != null) {
                         IconButton(onClick = {
                             activity?.let { act ->
@@ -281,6 +403,8 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                         }) {
                             Icon(Icons.Outlined.WorkspacePremium, contentDescription = stringResource(R.string.upgrade_to_premium))
                         }
+// Display selected images horizontally in a LazyRow when PDF creation is not active.
+                // Shows the count of selected images above the row.
                     }
                     // PDF Settings Icon
                     IconButton(onClick = { showPdfSettingsDialog = true }) {
@@ -293,9 +417,15 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
             if (!isPremiumUser) {
                 AdvertView(modifier = Modifier.fillMaxWidth())
             }
+/**
+                 * Button to initiate the PDF creation process using the currently selected images.
+                 * Enabled only when images are selected and PDF creation is not already in progress.
+                 */
         }
     ) { paddingValues ->
         Column(
+// Placeholder displayed in the center when no images are selected.
+                // Uses weight modifier to occupy remaining vertical space.
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues) // Apply padding from Scaffold
@@ -308,12 +438,24 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                     activity?.let { act ->
                         viewModel.billingClientWrapper.launchPurchaseFlow(act, premiumProduct.productDetails)
                     }
+/**
+     * Dialog to explain why camera permission is needed.
+     * Shown when `showCameraRationaleDialog` is true.
+     * On confirmation, launches the camera permission request.
+     * On dismissal, hides the dialog.
+     */
                 }) {
                     Icon(Icons.Outlined.WorkspacePremium, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text("${stringResource(R.string.upgrade_to_premium)} - ${premiumProduct.formattedPrice}")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+/**
+     * Dialog to explain why storage permission is needed.
+     * Shown when `showStorageRationaleDialog` is true.
+     * On confirmation, launches the storage permissions request.
+     * On dismissal, hides the dialog.
+     */
             }
 
             Row(
@@ -322,6 +464,13 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
+/**
+     * Dialog for configuring PDF generation settings (e.g., page size, orientation, quality).
+     * Shown when `showPdfSettingsDialog` is true.
+     * Passes current settings and premium status to the dialog.
+     * Updates settings in the ViewModel when changes are applied.
+     * Shows a Toast message indicating update success or prompting for premium upgrade.
+     */
                     onClick = {
                         when {
                             cameraPermissionState.status.isGranted -> viewModel.onTakePhotoClicked(true)
@@ -336,6 +485,13 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.take_photo))
                 }
+/**
+     * Dialog for adjusting the brightness and contrast of a selected image.
+     * Shown when `showBrightnessContrastDialogState` is true and an image URI is available
+     * in `imageToEditForAdjustment`.
+     * Passes the image URI, loading state, and error state to the dialog.
+     * Calls ViewModel functions to apply changes or dismiss the dialog.
+     */
 
                 Button(
                     onClick = {
@@ -489,6 +645,16 @@ val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
 }
 
 @Composable
+/**
+ * Composable function to display a single selected image thumbnail.
+ * Shows the image, a remove button (top-right), and a row of edit buttons (bottom-center)
+ * for crop/rotate and brightness/contrast adjustments.
+ *
+ * @param uri The URI of the image to display.
+ * @param onRemoveClick Lambda to be invoked when the remove button is clicked.
+ * @param onEditClick Lambda to be invoked when the crop/rotate edit button is clicked.
+ * @param onAdjustClick Lambda to be invoked when the brightness/contrast adjust button is clicked.
+ */
 fun SelectedImageItem(
    uri: Uri,
    onRemoveClick: () -> Unit,
@@ -551,6 +717,14 @@ fun SelectedImageItem(
            ) {
                Icon(
                    Icons.Outlined.ColorLens, // Or Tune icon
+/**
+ * A generic AlertDialog composable for displaying permission rationales.
+ *
+ * @param title The title of the dialog.
+ * @param text The rationale message explaining why the permission is needed.
+ * @param onConfirm Lambda to be invoked when the user confirms (e.g., to proceed with permission request).
+ * @param onDismiss Lambda to be invoked when the user dismisses the dialog.
+ */
                    contentDescription = "Adjust",
                    tint = MaterialTheme.colorScheme.onSurface,
                    modifier = Modifier.size(20.dp)
@@ -567,6 +741,14 @@ fun PermissionRationaleDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+/**
+ * Composable function to display a banner ad using AdMob.
+ * Uses AndroidView to embed the AdView. Configures the ad unit ID, ad size,
+ * and an AdListener to log ad events (load success/failure, open, click, close).
+ * Loads an ad request when the view is created.
+ *
+ * @param modifier Modifier for layout customization.
+ */
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = title) },
