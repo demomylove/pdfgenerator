@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp) // For Hilt and other annotation processors
-    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -129,7 +128,11 @@ dependencies {
     implementation("com.google.http-client:google-http-client-gson:1.42.3") // Check for latest compatible version
 
 
-    // Testing
+   // uCrop for image cropping
+   implementation("com.github.yalantis:ucrop:2.2.8") // Check for the latest version
+
+
+   // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
@@ -139,7 +142,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
-// Allow references to generated code
-kapt {
-    correctErrorTypes = true
-}
+// Kapt block removed as KSP is used for Hilt

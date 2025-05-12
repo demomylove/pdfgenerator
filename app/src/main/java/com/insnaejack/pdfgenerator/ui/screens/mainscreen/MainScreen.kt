@@ -1,6 +1,7 @@
 package com.insnaejack.pdfgenerator.ui.screens.mainscreen
 
 import android.Manifest
+import android.graphics.Bitmap
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -52,6 +53,19 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.yalantis.ucrop.UCrop // Import uCrop
+import com.yalantis.ucrop.UCropActivity // Needed for allowedGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.ColorLens
+import androidx.compose.material.icons.outlined.CropRotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat // For UCrop options colors
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.CircularProgressIndicator // For loading in dialog
 
 fun Context.createImageFile(): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
@@ -85,6 +99,8 @@ fun MainScreen(
     val premiumProductDetailsMap by viewModel.premiumProductDetails.collectAsState()
     val isPremiumUser by viewModel.isPremiumUser.collectAsState()
     val premiumProduct = premiumProductDetailsMap[ProductIds.PREMIUM_UPGRADE_ID]
+val imageToEditUriState by viewModel.imageToEditUri.collectAsState()
+    val showBrightnessContrastDialogState by viewModel.showBrightnessContrastDialog.collectAsState()
     val currentPdfSettings by viewModel.pdfSettings.collectAsState() // Ensure this is present
 
     LaunchedEffect(Unit) {
@@ -135,10 +151,32 @@ fun MainScreen(
         contract = ActivityResultContracts.GetMultipleContents(),
         onResult = { uris: List<Uri>? ->
             uris?.let { viewModel.addSelectedImageUris(it) }
-        }
-    )
+       }
+   )
 
-    LaunchedEffect(triggerCameraLaunch) {
+   // Launcher for uCrop Activity
+   val uCropLauncher = rememberLauncherForActivityResult(
+       contract = ActivityResultContracts.StartActivityForResult()
+   ) { result ->
+       if (result.resultCode == Activity.RESULT_OK) {
+           val resultUri = result.data?.let { UCrop.getOutput(it) }
+           val originalUri = viewModel.imageToEditUri.value // Get the original URI that was being edited
+           if (resultUri != null && originalUri != null) {
+               viewModel.updateEditedImage(originalUri, resultUri)
+           } else {
+               Toast.makeText(context, "Failed to get cropped image.", Toast.LENGTH_SHORT).show()
+           }
+       } else if (result.resultCode == UCrop.RESULT_ERROR) {
+           val cropError = result.data?.let { UCrop.getError(it) }
+           Toast.makeText(context, "Image cropping error: ${cropError?.message}", Toast.LENGTH_LONG).show()
+           cropError?.printStackTrace()
+       }
+       // Reset the trigger in ViewModel regardless of result
+       viewModel.onImageEditLaunched()
+   }
+
+
+   LaunchedEffect(triggerCameraLaunch) {
         if (triggerCameraLaunch) {
             val photoFile = context.createImageFile()
             val photoURI = FileProvider.getUriForFile(context, "${context.packageName}.provider", photoFile)
@@ -178,10 +216,51 @@ fun MainScreen(
                 viewModel.clearSelectedImages()
             }
             viewModel.consumePdfCreationStatus()
-        }
-    }
+       }
+   }
 
-    Scaffold(
+   // Effect to launch uCrop when imageToEditUri is set and dialog is not shown
+   LaunchedEffect(imageToEditUriState, showBrightnessContrastDialogState) {
+       val uriToEdit = imageToEditUriState // Use the collected state
+       val showDialog = showBrightnessContrastDialogState // Use the collected state
+       if (uriToEdit != null && !showDialog) {
+           // Create a destination URI for the cropped image
+           val destinationFileName = "cropped_${System.currentTimeMillis()}.jpg"
+           val destinationUri = Uri.fromFile(File(context.cacheDir, destinationFileName))
+
+           // Configure uCrop options
+           val options = UCrop.Options().apply {
+               setCompressionFormat(Bitmap.CompressFormat.JPEG)
+               setCompressionQuality(90) // Adjust quality as needed
+               setHideBottomControls(false)
+               setFreeStyleCropEnabled(true)
+               // Optional: Customize toolbar color, etc.
+                setToolbarColor(ContextCompat.getColor(context, R.color.purple_500)) // Example color
+                setStatusBarColor(ContextCompat.getColor(context, R.color.purple_700)) // Example color
+                setActiveControlsWidgetColor(ContextCompat.getColor(context, R.color.teal_200)) // Example color
+                setToolbarWidgetColor(ContextCompat.getColor(context, R.color.white)) // Example color
+                setRootViewBackgroundColor(ContextCompat.getColor(context, R.color.black)) // Example color
+
+               // Allow specific gestures
+               setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL)
+           }
+
+           // Build and launch uCrop Intent
+           val uCropIntent = UCrop.of(uriToEdit, destinationUri)
+               .withOptions(options)
+               // Optional: Set aspect ratio
+               // .withAspectRatio(1f, 1f)
+               // Optional: Set max size
+               // .withMaxResultSize(1000, 1000)
+               .getIntent(context)
+
+           uCropLauncher.launch(uCropIntent)
+           // ViewModel state is reset in the uCropLauncher result handling
+       }
+   }
+
+
+   Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
@@ -318,10 +397,15 @@ fun MainScreen(
                     modifier = Modifier.height(120.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(selectedImageUris) { uri ->
-                        SelectedImageItem(uri = uri, onRemoveClick = { viewModel.removeImageUri(uri) })
-                    }
-                }
+                   items(selectedImageUris, key = { it.toString() }) { uri -> // Add key for stability
+                       SelectedImageItem(
+                           uri = uri,
+                           onRemoveClick = { viewModel.removeImageUri(uri) },
+                           onEditClick = { viewModel.onEditImageClicked(uri) }, // Trigger uCrop
+                           onAdjustClick = { viewModel.onAdjustImageClicked(uri) } // Trigger Adjust Dialog
+                      )
+                 }
+             }
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = { viewModel.createPdfFromSelectedImages() },
@@ -382,34 +466,98 @@ fun MainScreen(
                     Toast.makeText(context, "Upgrade to premium to apply custom PDF settings.", Toast.LENGTH_LONG).show()
                 }
             }
-        )
-    }
+       )
+   }
+
+   // Observe ViewModel state for showing brightness/contrast dialog
+   val imageToEditForAdjustment by viewModel.imageToEditUri.collectAsState()
+   val isApplyingEdit by viewModel.isApplyingEdit.collectAsState()
+   val editError by viewModel.editError.collectAsState()
+
+   if (showBrightnessContrastDialogState && imageToEditForAdjustment != null) {
+       BrightnessContrastDialog(
+           imageUri = imageToEditForAdjustment!!, // Pass the URI to the dialog
+           isApplying = isApplyingEdit,
+           error = editError,
+           onDismiss = { viewModel.onBrightnessContrastDialogDismissed() },
+           onApply = { uri, brightness, contrast -> // Receive URI back from dialog
+               viewModel.applyBrightnessContrast(uri, brightness, contrast)
+           },
+           onConsumeError = { viewModel.consumeEditError() }
+       )
+   }
 }
 
 @Composable
-fun SelectedImageItem(uri: Uri, onRemoveClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(100.dp)
-            .padding(4.dp)
-    ) {
+fun SelectedImageItem(
+   uri: Uri,
+   onRemoveClick: () -> Unit,
+   onEditClick: () -> Unit,
+   onAdjustClick: () -> Unit
+) {
+   Box(
+       modifier = Modifier
+           .size(120.dp) // Slightly larger to accommodate buttons
+           .padding(4.dp)
+   ) {
         Image(
             painter = rememberAsyncImagePainter(model = uri),
             contentDescription = "Selected Image",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-        IconButton(
-            onClick = onRemoveClick,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(4.dp)
-                .size(24.dp)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), shape = MaterialTheme.shapes.small)
-        ) {
-            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove_image), tint = MaterialTheme.colorScheme.onSurface)
-        }
-    }
+           contentScale = ContentScale.Crop
+       )
+       // Remove Button (Top Right)
+       IconButton(
+           onClick = onRemoveClick,
+           modifier = Modifier
+               .align(Alignment.TopEnd)
+               .padding(2.dp)
+               .size(24.dp)
+               .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), shape = CircleShape)
+       ) {
+           Icon(
+               Icons.Filled.Close,
+               contentDescription = stringResource(R.string.remove_image),
+               tint = MaterialTheme.colorScheme.onSurface,
+               modifier = Modifier.size(16.dp) // Smaller icon
+           )
+       }
+
+       // Edit Buttons Row (Bottom Center)
+       Row(
+           modifier = Modifier
+               .align(Alignment.BottomCenter)
+               .fillMaxWidth()
+               .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+               .padding(vertical = 2.dp),
+           horizontalArrangement = Arrangement.SpaceEvenly
+       ) {
+           // Edit (Crop/Rotate) Button
+           IconButton(
+               onClick = onEditClick,
+               modifier = Modifier.size(32.dp)
+           ) {
+               Icon(
+                   Icons.Outlined.CropRotate,
+                   contentDescription = "Crop/Rotate",
+                   tint = MaterialTheme.colorScheme.onSurface,
+                   modifier = Modifier.size(20.dp)
+               )
+           }
+           // Adjust (Brightness/Contrast) Button
+           IconButton(
+               onClick = onAdjustClick,
+               modifier = Modifier.size(32.dp)
+           ) {
+               Icon(
+                   Icons.Outlined.ColorLens, // Or Tune icon
+                   contentDescription = "Adjust",
+                   tint = MaterialTheme.colorScheme.onSurface,
+                   modifier = Modifier.size(20.dp)
+               )
+           }
+       }
+   }
 }
 
 @Composable
@@ -494,15 +642,93 @@ fun MainScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun SelectedImageItemPreview() {
-    PdfGeneratorTheme {
-        SelectedImageItem(uri = Uri.EMPTY, onRemoveClick = {})
-    }
+  PdfGeneratorTheme {
+      SelectedImageItem(uri = Uri.EMPTY, onRemoveClick = {}, onEditClick = {}, onAdjustClick = {})
+  }
 }
+
+// Need to add imports for ContextCompat, Color, etc. if not already present
+// import androidx.core.content.ContextCompat
+// import androidx.compose.ui.graphics.Color
+// import androidx.compose.foundation.shape.CircleShape
+// import androidx.compose.material.icons.outlined.ColorLens
+// import androidx.compose.material.icons.outlined.CropRotate
+// import androidx.compose.ui.unit.sp
 
 @Preview(showBackground = true)
 @Composable
 fun AdvertViewPreview(){
-    PdfGeneratorTheme {
-        AdvertView(modifier = Modifier.fillMaxWidth())
-    }
+   PdfGeneratorTheme {
+       AdvertView(modifier = Modifier.fillMaxWidth())
+   }
+}
+
+@Composable
+fun BrightnessContrastDialog(
+   imageUri: Uri,
+   isApplying: Boolean,
+   error: String?,
+   onDismiss: () -> Unit,
+   onApply: (uri: Uri, brightness: Float, contrast: Float) -> Unit,
+   onConsumeError: () -> Unit
+) {
+   var brightness by remember { mutableStateOf(0f) } // Range e.g., -0.5f to 0.5f or as needed
+   var contrast by remember { mutableStateOf(1f) }   // Range e.g., 0.5f to 1.5f (1f is no change)
+
+   AlertDialog(
+       onDismissRequest = { if (!isApplying) onDismiss() },
+       title = { Text("Adjust Brightness & Contrast") },
+       text = {
+           Column {
+               if (isApplying) {
+                   Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                       CircularProgressIndicator()
+                   }
+               } else {
+                   // Brightness Slider
+                   Text("Brightness: ${String.format("%.2f", brightness * 100)}%") // Show as percentage
+                   Slider(
+                       value = brightness,
+                       onValueChange = { brightness = it },
+                       valueRange = -0.5f..0.5f, // Adjusted range for finer control around 0
+                       steps = 19 // (0.5 - (-0.5)) / 0.05 - 1 = 1/0.05 -1 = 20-1 = 19 steps for 0.05 increments
+                   )
+                   Spacer(modifier = Modifier.height(16.dp))
+
+                   // Contrast Slider
+                   Text("Contrast: ${String.format("%.2f", contrast)}")
+                   Slider(
+                       value = contrast,
+                       onValueChange = { contrast = it },
+                       valueRange = 0.5f..1.5f, // Adjusted range for finer control around 1
+                       steps = 19 // (1.5 - 0.5) / 0.05 - 1 = 1/0.05 -1 = 19 steps for 0.05 increments
+                   )
+               }
+               error?.let {
+                   Spacer(modifier = Modifier.height(8.dp))
+                   Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                   // Consider a button to dismiss the error explicitly if auto-consumption is not desired
+                   TextButton(onClick = onConsumeError, modifier = Modifier.align(Alignment.End)) {
+                       Text("Dismiss Error")
+                   }
+               }
+           }
+       },
+       confirmButton = {
+           TextButton(
+               onClick = { onApply(imageUri, brightness, contrast) }, // Pass imageUri back
+               enabled = !isApplying
+           ) {
+               Text("Apply")
+           }
+       },
+       dismissButton = {
+           TextButton(
+               onClick = { onDismiss() },
+               enabled = !isApplying
+           ) {
+               Text("Cancel")
+           }
+       }
+   )
 }

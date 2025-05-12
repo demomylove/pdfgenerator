@@ -17,7 +17,7 @@ dependencyResolutionManagement {
         maven { url = uri("https://maven.aliyun.com/repository/google") }
         maven { url = uri("https://developer.huawei.com/repo/") }
         // Jitpack if needed:
-        // maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://jitpack.io") }
     }
     // Version catalog is implicitly enabled by Gradle 8.4+ if libs.versions.toml exists
 }
