@@ -489,8 +489,9 @@ constructor(
             val context = application.applicationContext // Now 'application' is accessible
             var inputStream: java.io.InputStream? = null
             var outputStream: FileOutputStream? = null
-            var originalBitmap: Bitmap? = null
-            var editedBitmap: Bitmap? = null
+            // Declared without initial assignment, will be assigned in try or error
+            val originalBitmap: Bitmap
+            var editedBitmap: Bitmap? // Initializer removed, will be assigned in try block
             val tempOutputFile: File
 
             try {
@@ -504,7 +505,7 @@ constructor(
                 // Use BitmapFactory.Options to handle potential large images and check bounds
                 val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeStream(inputStream, null, options)
-                inputStream?.close() // Close stream after getting bounds
+                inputStream.close() // Close stream after getting bounds; inputStream is non-null here
 
                 // Calculate inSampleSize if needed (optional, for memory optimization)
                 // options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
@@ -517,9 +518,7 @@ constructor(
                         )
                 originalBitmap =
                     BitmapFactory.decodeStream(inputStream, null, options)
-                        ?: throw IllegalStateException(
-                            "Could not decode bitmap from URI: $sourceUri",
-                        )
+                        ?: throw IllegalStateException("Could not decode bitmap from URI: $sourceUri (BitmapFactory.decodeStream returned null)")
 
                 // 2. Create ColorMatrix for brightness and contrast
                 val brightnessValue = brightness * 255f
@@ -553,8 +552,9 @@ constructor(
 
                 // 3. Apply ColorMatrix using Paint and Canvas
                 // Ensure the edited bitmap is mutable if the original wasn't
+                // originalBitmap is now guaranteed non-null here due to the check above
                 editedBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
-                val canvas = Canvas(editedBitmap)
+                val canvas = Canvas(editedBitmap) // Also non-null
                 val paint =
                     Paint().apply {
                         colorFilter = ColorMatrixColorFilter(colorMatrix)
@@ -568,7 +568,7 @@ constructor(
                 val timestamp = System.currentTimeMillis()
                 // Use JPEG for potentially smaller file size, or PNG for lossless
                 val extension = "jpg"
-                val mimeType = "image/jpeg"
+                // val mimeType = "image/jpeg" // Not used
                 val quality = 95 // For JPEG
                 tempOutputFile =
                     File(
@@ -583,7 +583,8 @@ constructor(
                     } else {
                         Bitmap.CompressFormat.JPEG
                     }
-                editedBitmap.compress(compressFormat, quality, outputStream)
+                // editedBitmap is guaranteed non-null here
+                editedBitmap?.compress(compressFormat, quality, outputStream)
                 outputStream.flush()
 
                 // 5. Return Uri of the new file

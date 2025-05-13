@@ -52,6 +52,7 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.insnaejack.pdfgenerator.R
 import com.insnaejack.pdfgenerator.billing.ProductIds
+import com.insnaejack.pdfgenerator.ui.navigation.AppDestinations
 import com.insnaejack.pdfgenerator.ui.screens.settings.PdfSettingsDialog
 import com.insnaejack.pdfgenerator.ui.theme.PdfGeneratorTheme
 import com.yalantis.ucrop.UCrop // Import uCrop
@@ -474,6 +475,13 @@ fun MainScreen(navController: NavController, viewModel: MainScreenViewModel = hi
                             Icons.Filled.Settings,
                             contentDescription =
                             stringResource(R.string.action_settings),
+                        )
+                    }
+                    // Icon to navigate to PDF List Screen
+                    IconButton(onClick = { navController.navigate(AppDestinations.PDF_LIST_ROUTE) }) {
+                        Icon(
+                            Icons.Filled.Folder, // Or Icons.Filled.List, Icons.Filled.Article etc.
+                            contentDescription = stringResource(R.string.view_my_pdfs_action),
                         )
                     }
                 },

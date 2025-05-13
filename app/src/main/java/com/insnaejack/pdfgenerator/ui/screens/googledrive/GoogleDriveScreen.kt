@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack // Changed import
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.ImageSearch
@@ -123,7 +123,7 @@ fun GoogleDriveScreen(
                 title = { Text("Select from Google Drive") }, // TODO: Add to strings.xml
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back") // TODO: Add to strings.xml
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") // TODO: Add to strings.xml
                     }
                 },
                 actions = {

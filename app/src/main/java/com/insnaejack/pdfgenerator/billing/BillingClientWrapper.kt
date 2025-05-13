@@ -112,8 +112,9 @@ class BillingClientWrapper @Inject constructor(
             .build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null) {
-                val newDetailsMap = productDetailsList.associate { details ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                // productDetailsList is non-null when responseCode is OK
+                val newDetailsMap = productDetailsList.associate { details -> // Removed !!
                     val wrapper = ProductDetailsWrapper(
                         productId = details.productId,
                         name = details.name,

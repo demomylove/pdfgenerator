@@ -13,11 +13,13 @@ import androidx.navigation.compose.rememberNavController
 import com.insnaejack.pdfgenerator.ui.screens.googledrive.GoogleDriveScreen
 import com.insnaejack.pdfgenerator.ui.screens.mainscreen.MainScreen
 import com.insnaejack.pdfgenerator.ui.screens.mainscreen.MainScreenViewModel
+import com.insnaejack.pdfgenerator.ui.screens.pdflist.PdfListScreen
 
 // Define navigation routes
 object AppDestinations {
     const val MAIN_SCREEN_ROUTE = "main"
     const val GOOGLE_DRIVE_ROUTE = "google_drive"
+    const val PDF_LIST_ROUTE = "pdf_list"
     // Add other destinations here as we build them
     // const val IMAGE_PREVIEW_ROUTE = "image_preview"
     // const val PDF_SETTINGS_ROUTE = "pdf_settings"
@@ -70,5 +72,10 @@ fun AppNavigation(
             // PdfSettingsScreen(navController = navController)
         }
          */
+        composable(AppDestinations.PDF_LIST_ROUTE) {
+            PdfListScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
     }
 }
