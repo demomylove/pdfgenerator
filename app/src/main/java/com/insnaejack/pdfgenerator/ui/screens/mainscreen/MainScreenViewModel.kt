@@ -12,9 +12,6 @@ import com.insnaejack.pdfgenerator.billing.ProductDetailsWrapper
 import com.insnaejack.pdfgenerator.model.PdfSettings // Import PdfSettings
 import com.insnaejack.pdfgenerator.utils.PdfGeneratorUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.io.File
-import java.io.FileOutputStream
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,8 +19,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import javax.inject.Inject
 
-@HiltViewModel
 /**
  * ViewModel for the [MainScreen]. Manages the state related to image selection, PDF creation,
  * permissions, billing status, PDF settings, and image editing operations.
@@ -31,27 +30,29 @@ import kotlinx.coroutines.withContext
  * @property application Provides application context for file operations and resource access.
  * @property billingClientWrapper Handles interactions with the Google Play Billing Library.
  */
+@HiltViewModel
 class MainScreenViewModel
 @Inject
 constructor(
-        private val application: Application, // Inject Application context
-        val billingClientWrapper: BillingClientWrapper // Inject BillingClientWrapper
+    private val application: Application, // Inject Application context
+    val billingClientWrapper: BillingClientWrapper, // Inject BillingClientWrapper
 ) : ViewModel() {
 
     // --- Permissions ---
     /** The camera permission string (Manifest.permission.CAMERA). */
     val cameraPermission: String = Manifest.permission.CAMERA
+
     /**
      * List of storage permissions required. Uses [Manifest.permission.READ_MEDIA_IMAGES] for
      * Android 13 (API 33) and above, otherwise defaults to
      * [Manifest.permission.READ_EXTERNAL_STORAGE].
      */
     val storagePermissions: List<String> =
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.READ_MEDIA_IMAGES)
-            } else {
-                listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            listOf(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
 
     // --- UI Triggers & Image Selection State ---
     // --- UI Triggers & Image Selection State ---
@@ -79,7 +80,7 @@ constructor(
      */
     private val _pdfCreationStatus = MutableStateFlow<PdfGeneratorUtil.PdfCreationResult?>(null)
     val pdfCreationStatus: StateFlow<PdfGeneratorUtil.PdfCreationResult?> =
-            _pdfCreationStatus.asStateFlow()
+        _pdfCreationStatus.asStateFlow()
 
     /** StateFlow indicating whether the PDF creation process is currently active. */
     private val _isCreatingPdf = MutableStateFlow(false)
@@ -98,7 +99,8 @@ constructor(
      * billing client.
      */
     val premiumProductDetails: StateFlow<Map<String, ProductDetailsWrapper>> =
-            billingClientWrapper.productDetailsMap
+        billingClientWrapper.productDetailsMap
+
     /**
      * StateFlow indicating whether the current user is a premium subscriber. Sourced from the
      * billing client.
@@ -126,7 +128,7 @@ constructor(
     /** StateFlow indicating whether the brightness/contrast adjustment dialog should be shown. */
     private val _showBrightnessContrastDialog = MutableStateFlow(false)
     val showBrightnessContrastDialog: StateFlow<Boolean> =
-            _showBrightnessContrastDialog.asStateFlow()
+        _showBrightnessContrastDialog.asStateFlow()
 
     /**
      * StateFlow indicating whether an image editing operation (e.g., brightness/contrast) is
@@ -266,7 +268,7 @@ constructor(
     fun onEditImageClicked(uri: Uri) {
         _imageToEditUri.value = uri
         _showBrightnessContrastDialog.value =
-                false // Ensure only one edit type is triggered at a time
+            false // Ensure only one edit type is triggered at a time
     }
 
     /**
@@ -358,7 +360,7 @@ constructor(
     fun createPdfFromSelectedImages() {
         if (_selectedImageUris.value.isEmpty()) {
             _pdfCreationStatus.value =
-                    PdfGeneratorUtil.PdfCreationResult(false, errorMessage = "No images selected.")
+                PdfGeneratorUtil.PdfCreationResult(false, errorMessage = "No images selected.")
             return
         }
         viewModelScope.launch {
@@ -368,17 +370,17 @@ constructor(
             // though PdfDocument API itself is reasonably efficient.
             // For very large numbers of images or complex processing, consider Dispatchers.IO
             val currentSettings =
-                    if (isPremiumUser.value) {
-                        _pdfSettings.value // Use user-defined settings if premium
-                    } else {
-                        PdfSettings() // Use default settings if not premium
-                    }
+                if (isPremiumUser.value) {
+                    _pdfSettings.value // Use user-defined settings if premium
+                } else {
+                    PdfSettings() // Use default settings if not premium
+                }
             val result =
-                    PdfGeneratorUtil.createPdf(
-                            application.applicationContext,
-                            _selectedImageUris.value,
-                            currentSettings
-                    )
+                PdfGeneratorUtil.createPdf(
+                    application.applicationContext,
+                    _selectedImageUris.value,
+                    currentSettings,
+                )
             _pdfCreationStatus.value = result
             if (result.success) {
                 // Optionally clear images after successful PDF creation
@@ -479,119 +481,122 @@ constructor(
      * @throws Exception if any other part of the image processing or file saving fails.
      */
     private suspend fun applyColorMatrixAdjustments(
-            sourceUri: Uri,
-            brightness: Float,
-            contrast: Float
+        sourceUri: Uri,
+        brightness: Float,
+        contrast: Float,
     ): Uri =
-            withContext(Dispatchers.IO) {
-                val context = application.applicationContext // Now 'application' is accessible
-                var inputStream: java.io.InputStream? = null
-                var outputStream: FileOutputStream? = null
-                var originalBitmap: Bitmap? = null
-                var editedBitmap: Bitmap? = null
-                val tempOutputFile: File
+        withContext(Dispatchers.IO) {
+            val context = application.applicationContext // Now 'application' is accessible
+            var inputStream: java.io.InputStream? = null
+            var outputStream: FileOutputStream? = null
+            var originalBitmap: Bitmap? = null
+            var editedBitmap: Bitmap? = null
+            val tempOutputFile: File
 
-                try {
-                    // 1. Decode Bitmap from Uri
-                    inputStream =
-                            context.contentResolver.openInputStream(sourceUri)
-                                    ?: throw IllegalStateException(
-                                            "Could not open input stream for URI: $sourceUri"
-                                    )
+            try {
+                // 1. Decode Bitmap from Uri
+                inputStream =
+                    context.contentResolver.openInputStream(sourceUri)
+                        ?: throw IllegalStateException(
+                            "Could not open input stream for URI: $sourceUri",
+                        )
 
-                    // Use BitmapFactory.Options to handle potential large images and check bounds
-                    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                // Use BitmapFactory.Options to handle potential large images and check bounds
+                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                BitmapFactory.decodeStream(inputStream, null, options)
+                inputStream?.close() // Close stream after getting bounds
+
+                // Calculate inSampleSize if needed (optional, for memory optimization)
+                // options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
+                options.inJustDecodeBounds = false // Now decode the actual bitmap
+
+                inputStream =
+                    context.contentResolver.openInputStream(sourceUri) // Reopen stream
+                        ?: throw IllegalStateException(
+                            "Could not reopen input stream for URI: $sourceUri",
+                        )
+                originalBitmap =
                     BitmapFactory.decodeStream(inputStream, null, options)
-                    inputStream?.close() // Close stream after getting bounds
+                        ?: throw IllegalStateException(
+                            "Could not decode bitmap from URI: $sourceUri",
+                        )
 
-                    // Calculate inSampleSize if needed (optional, for memory optimization)
-                    // options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
-                    options.inJustDecodeBounds = false // Now decode the actual bitmap
+                // 2. Create ColorMatrix for brightness and contrast
+                val brightnessValue = brightness * 255f
+                val scale = contrast
+                val translate = (-0.5f * scale + 0.5f) * 255f + brightnessValue
+                val colorMatrix =
+                    ColorMatrix(
+                        floatArrayOf(
+                            scale,
+                            0f,
+                            0f,
+                            0f,
+                            translate, // Red
+                            0f,
+                            scale,
+                            0f,
+                            0f,
+                            translate, // Green
+                            0f,
+                            0f,
+                            scale,
+                            0f,
+                            translate, // Blue
+                            0f,
+                            0f,
+                            0f,
+                            1f,
+                            0f, // Alpha
+                        ),
+                    )
 
-                    inputStream =
-                            context.contentResolver.openInputStream(sourceUri) // Reopen stream
-                                    ?: throw IllegalStateException(
-                                            "Could not reopen input stream for URI: $sourceUri"
-                                    )
-                    originalBitmap =
-                            BitmapFactory.decodeStream(inputStream, null, options)
-                                    ?: throw IllegalStateException(
-                                            "Could not decode bitmap from URI: $sourceUri"
-                                    )
+                // 3. Apply ColorMatrix using Paint and Canvas
+                // Ensure the edited bitmap is mutable if the original wasn't
+                editedBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+                val canvas = Canvas(editedBitmap)
+                val paint =
+                    Paint().apply {
+                        colorFilter = ColorMatrixColorFilter(colorMatrix)
+                        isAntiAlias = true
+                    }
+                // Draw the original bitmap onto the mutable edited bitmap with the paint filter
+                // We draw the original onto the *copy* we made mutable.
+                canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
 
-                    // 2. Create ColorMatrix for brightness and contrast
-                    val brightnessValue = brightness * 255f
-                    val scale = contrast
-                    val translate = (-0.5f * scale + 0.5f) * 255f + brightnessValue
-                    val colorMatrix =
-                            ColorMatrix(
-                                    floatArrayOf(
-                                            scale,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            translate, // Red
-                                            0f,
-                                            scale,
-                                            0f,
-                                            0f,
-                                            translate, // Green
-                                            0f,
-                                            0f,
-                                            scale,
-                                            0f,
-                                            translate, // Blue
-                                            0f,
-                                            0f,
-                                            0f,
-                                            1f,
-                                            0f // Alpha
-                                    )
-                            )
+                // 4. Save edited Bitmap to a temporary file
+                val timestamp = System.currentTimeMillis()
+                // Use JPEG for potentially smaller file size, or PNG for lossless
+                val extension = "jpg"
+                val mimeType = "image/jpeg"
+                val quality = 95 // For JPEG
+                tempOutputFile =
+                    File(
+                        context.cacheDir,
+                        "edited_${timestamp}_${sourceUri.lastPathSegment?.substringBeforeLast('.') ?: "image"}.$extension",
+                    )
 
-                    // 3. Apply ColorMatrix using Paint and Canvas
-                    // Ensure the edited bitmap is mutable if the original wasn't
-                    editedBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
-                    val canvas = Canvas(editedBitmap)
-                    val paint =
-                            Paint().apply {
-                                colorFilter = ColorMatrixColorFilter(colorMatrix)
-                                isAntiAlias = true
-                            }
-                    // Draw the original bitmap onto the mutable edited bitmap with the paint filter
-                    // We draw the original onto the *copy* we made mutable.
-                    canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
+                outputStream = FileOutputStream(tempOutputFile)
+                val compressFormat =
+                    if (extension == "png") {
+                        Bitmap.CompressFormat.PNG
+                    } else {
+                        Bitmap.CompressFormat.JPEG
+                    }
+                editedBitmap.compress(compressFormat, quality, outputStream)
+                outputStream.flush()
 
-                    // 4. Save edited Bitmap to a temporary file
-                    val timestamp = System.currentTimeMillis()
-                    // Use JPEG for potentially smaller file size, or PNG for lossless
-                    val extension = "jpg"
-                    val mimeType = "image/jpeg"
-                    val quality = 95 // For JPEG
-                    tempOutputFile =
-                            File(
-                                    context.cacheDir,
-                                    "edited_${timestamp}_${sourceUri.lastPathSegment?.substringBeforeLast('.') ?: "image"}.$extension"
-                            )
-
-                    outputStream = FileOutputStream(tempOutputFile)
-                    val compressFormat =
-                            if (extension == "png") Bitmap.CompressFormat.PNG
-                            else Bitmap.CompressFormat.JPEG
-                    editedBitmap.compress(compressFormat, quality, outputStream)
-                    outputStream.flush()
-
-                    // 5. Return Uri of the new file
-                    tempOutputFile.toUri()
-                } finally {
-                    // Clean up resources
-                    inputStream?.close()
-                    outputStream?.close()
-                    // Recycle original bitmap only if it's safe (not used elsewhere)
-                    // originalBitmap?.recycle()
-                    // editedBitmap is implicitly handled by the Uri pointing to the saved file,
-                    // but explicit recycle might be needed if keeping many bitmaps in memory.
-                    // editedBitmap?.recycle()
-                }
+                // 5. Return Uri of the new file
+                tempOutputFile.toUri()
+            } finally {
+                // Clean up resources
+                inputStream?.close()
+                outputStream?.close()
+                // Recycle original bitmap only if it's safe (not used elsewhere)
+                // originalBitmap?.recycle()
+                // editedBitmap is implicitly handled by the Uri pointing to the saved file,
+                // but explicit recycle might be needed if keeping many bitmaps in memory.
+                // editedBitmap?.recycle()
             }
+        }
 }

@@ -10,7 +10,6 @@ import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import com.insnaejack.pdfgenerator.model.PdfSettings
 import java.io.ByteArrayOutputStream
@@ -28,14 +27,14 @@ object PdfGeneratorUtil {
     data class PdfCreationResult(
         val success: Boolean,
         val filePath: String? = null,
-        val errorMessage: String? = null
+        val errorMessage: String? = null,
     )
 
     fun createPdf(
         context: Context,
         imageUris: List<Uri>,
         settings: PdfSettings,
-        fileNamePrefix: String = "GeneratedPDF"
+        fileNamePrefix: String = "GeneratedPDF",
     ): PdfCreationResult {
         if (imageUris.isEmpty()) {
             return PdfCreationResult(false, errorMessage = "No images provided.")
@@ -74,7 +73,7 @@ object PdfGeneratorUtil {
                     val pageInfo = PdfDocument.PageInfo.Builder(
                         settings.pageDisplayWidth,
                         settings.pageDisplayHeight,
-                        index + 1
+                        index + 1,
                     ).create()
                     val page = pdfDocument.startPage(pageInfo)
                     val canvas: Canvas = page.canvas
@@ -119,7 +118,7 @@ object PdfGeneratorUtil {
         }
 
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "${fileNamePrefix}_${timeStamp}.pdf"
+        val fileName = "${fileNamePrefix}_$timeStamp.pdf"
         val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
 
         if (storageDir == null) {

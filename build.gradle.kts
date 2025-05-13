@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
+    id("com.diffplug.spotless") version "6.25.0" apply false
 }
 
 // Repositories for plugins are defined in settings.gradle.kts

@@ -3,7 +3,16 @@ package com.insnaejack.pdfgenerator.billing
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import com.android.billingclient.api.*
+import com.android.billingclient.api.AcknowledgePurchaseParams
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ProductDetails
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.PurchasesUpdatedListener
+import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryPurchasesParams
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -20,12 +29,12 @@ data class ProductDetailsWrapper(
     val name: String,
     val description: String,
     val formattedPrice: String,
-    val productDetails: ProductDetails // Keep original for launching purchase flow
+    val productDetails: ProductDetails, // Keep original for launching purchase flow
 )
 
 @Singleton
 class BillingClientWrapper @Inject constructor(
-    private val context: Context // ApplicationContext
+    private val context: Context, // ApplicationContext
 ) : PurchasesUpdatedListener, BillingClientStateListener {
 
     private lateinit var billingClient: BillingClient
@@ -94,7 +103,7 @@ class BillingClientWrapper @Inject constructor(
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(ProductIds.PREMIUM_UPGRADE_ID)
                 .setProductType(BillingClient.ProductType.INAPP) // For one-time purchase
-                .build()
+                .build(),
             // Add other products here if needed
         )
 
@@ -110,7 +119,7 @@ class BillingClientWrapper @Inject constructor(
                         name = details.name,
                         description = details.description,
                         formattedPrice = details.oneTimePurchaseOfferDetails?.formattedPrice ?: "N/A",
-                        productDetails = details
+                        productDetails = details,
                     )
                     details.productId to wrapper
                 }
@@ -132,7 +141,7 @@ class BillingClientWrapper @Inject constructor(
         val productDetailsParamsList = listOf(
             BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(productDetails)
-                .build()
+                .build(),
         )
 
         val billingFlowParams = BillingFlowParams.newBuilder()
@@ -199,13 +208,14 @@ class BillingClientWrapper @Inject constructor(
             return
         }
         billingClient.queryPurchasesAsync(
-            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
+            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),
         ) { billingResult, purchasesList ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 var premiumFound = false
                 purchasesList.forEach { purchase ->
                     if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED &&
-                        purchase.products.contains(ProductIds.PREMIUM_UPGRADE_ID)) {
+                        purchase.products.contains(ProductIds.PREMIUM_UPGRADE_ID)
+                    ) {
                         premiumFound = true
                         // Ensure it's acknowledged if not already
                         if (!purchase.isAcknowledged) {

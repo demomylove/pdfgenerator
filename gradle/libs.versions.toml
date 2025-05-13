@@ -33,6 +33,7 @@ junit = "4.13.2"
 androidxTestExtJunit = "1.1.5"
 espressoCore = "3.5.1"
 material = "1.12.0" # Check for latest stable version
+ktlint = "0.50.0" # Version for ktlint
 
 [libraries]
 # AndroidX Core & Lifecycle

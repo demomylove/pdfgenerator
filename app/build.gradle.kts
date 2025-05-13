@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp) // For Hilt and other annotation processors
+    id("com.diffplug.spotless")
 }
 
 android {
@@ -29,7 +30,7 @@ android {
             isShrinkResources = true // Enable resource shrinking
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             // TODO: Add signing configurations for release builds
         }
@@ -127,12 +128,10 @@ dependencies {
     // Add http client if needed by google-api-services-drive, e.g.,
     implementation("com.google.http-client:google-http-client-gson:1.42.3") // Check for latest compatible version
 
+    // uCrop for image cropping
+    implementation("com.github.yalantis:ucrop:2.2.8") // Check for the latest version
 
-   // uCrop for image cropping
-   implementation("com.github.yalantis:ucrop:2.2.8") // Check for the latest version
-
-
-   // Testing
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
@@ -143,3 +142,32 @@ dependencies {
 }
 
 // Kapt block removed as KSP is used for Hilt
+
+spotless {
+    // Optional: Specify encoding (UTF-8 is default)
+    // encoding("UTF-8")
+
+    kotlin {
+        // Use ktlint for Kotlin files
+        ktlint(libs.versions.ktlint.get()).editorConfigOverride(
+            mapOf(
+                "ktlint_standard_no-wildcard-imports" to "disabled",
+            ),
+        )
+        // You can also specify a specific version of ktlint, e.g., ktlint("0.49.1")
+
+        target("**/*.kt")
+        targetExclude("**/build/", "**/generated/") // Exclude build and generated directories
+
+        // Optional: Add a license header
+        // licenseHeaderFile(rootProject.file("spotless/copyright.kt")) // Example path
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint(libs.versions.ktlint.get()).editorConfigOverride(
+            mapOf(
+                "ktlint_standard_no-wildcard-imports" to "disabled", // Also for gradle files
+            ),
+        )
+    }
+}

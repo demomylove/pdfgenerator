@@ -4,7 +4,8 @@ package com.insnaejack.pdfgenerator.model
 enum class PageSize(val width: Int, val height: Int, val displayName: String) {
     A4(595, 842, "A4 (210 x 297 mm)"),
     LETTER(612, 792, "Letter (8.5 x 11 in)"),
-    LEGAL(612, 1008, "Legal (8.5 x 14 in)");
+    LEGAL(612, 1008, "Legal (8.5 x 14 in)"),
+    ;
     // Add more common page sizes if needed
 
     override fun toString(): String = displayName
@@ -12,15 +13,17 @@ enum class PageSize(val width: Int, val height: Int, val displayName: String) {
 
 enum class PageOrientation(val displayName: String) {
     PORTRAIT("Portrait"),
-    LANDSCAPE("Landscape");
+    LANDSCAPE("Landscape"),
+    ;
 
     override fun toString(): String = displayName
 }
 
 enum class ImageQuality(val compressionQuality: Int, val displayName: String) {
-    LOW(50, "Low (Smaller File Size)"),       // Example: 50% JPEG quality
-    MEDIUM(75, "Medium (Balanced)"),    // Example: 75% JPEG quality
-    HIGH(95, "High (Larger File Size)");   // Example: 95% JPEG quality
+    LOW(50, "Low (Smaller File Size)"), // Example: 50% JPEG quality
+    MEDIUM(75, "Medium (Balanced)"), // Example: 75% JPEG quality
+    HIGH(95, "High (Larger File Size)"), // Example: 95% JPEG quality
+    ;
 
     override fun toString(): String = displayName
 }
@@ -32,7 +35,7 @@ data class PdfSettings(
     val marginTop: Int = 36, // 0.5 inch
     val marginBottom: Int = 36,
     val marginLeft: Int = 36,
-    val marginRight: Int = 36
+    val marginRight: Int = 36,
 ) {
     val pageDisplayWidth: Int
         get() = if (orientation == PageOrientation.PORTRAIT) pageSize.width else pageSize.height

@@ -86,7 +86,7 @@ fun PdfGeneratorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android S+
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -112,6 +112,6 @@ fun PdfGeneratorTheme(
         colorScheme = colorScheme,
         typography = Typography, // We'll create Typography.kt next
         shapes = Shapes, // We'll create Shapes.kt next
-        content = content
+        content = content,
     )
 }

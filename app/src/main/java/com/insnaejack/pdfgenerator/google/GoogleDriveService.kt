@@ -2,8 +2,8 @@ package com.insnaejack.pdfgenerator.google
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -28,10 +28,11 @@ import javax.inject.Singleton
 
 @Singleton
 class GoogleDriveService @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) {
     companion object {
         private const val TAG = "GoogleDriveService"
+
         // Request read-only access to files created or opened by the app.
         // Use DriveScopes.DRIVE_FILE for broader access if needed, but request minimal scope first.
         private val DRIVE_SCOPES = listOf(DriveScopes.DRIVE_READONLY)
@@ -64,7 +65,7 @@ class GoogleDriveService @Inject constructor(
                 Drive.Builder(
                     NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
-                    credential
+                    credential,
                 )
                     .setApplicationName("PDF Generator") // Replace with your app name
                     .build()
@@ -95,7 +96,7 @@ class GoogleDriveService @Inject constructor(
         }
     }
 
-suspend fun downloadFile(driveService: Drive, file: com.google.api.services.drive.model.File): Uri? {
+    suspend fun downloadFile(driveService: Drive, file: com.google.api.services.drive.model.File): Uri? {
         return withContext(Dispatchers.IO) {
             val fileId = file.id
             if (fileId == null) {
@@ -113,8 +114,8 @@ suspend fun downloadFile(driveService: Drive, file: com.google.api.services.driv
                 }
                 val tempFile = File.createTempFile(
                     "drive_${fileId}_", // Prefix
-                    extension,          // Suffix
-                    context.cacheDir    // Directory
+                    extension, // Suffix
+                    context.cacheDir, // Directory
                 )
 
                 // Get file content input stream
@@ -130,13 +131,12 @@ suspend fun downloadFile(driveService: Drive, file: com.google.api.services.driv
 
                 Log.i(TAG, "File downloaded successfully to: ${tempFile.absolutePath}")
                 tempFile.toUri() // Return the Uri of the downloaded temporary file
-
             } catch (e: IOException) {
                 Log.e(TAG, "Failed to download file ID: $fileId", e)
                 null
             } catch (e: Exception) {
-                 Log.e(TAG, "An unexpected error occurred during download for file ID: $fileId", e)
-                 null
+                Log.e(TAG, "An unexpected error occurred during download for file ID: $fileId", e)
+                null
             }
         }
     }

@@ -5,24 +5,24 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.insnaejack.pdfgenerator.google.GoogleDriveService
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import com.insnaejack.pdfgenerator.google.GoogleDriveService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import javax.inject.Inject
 import com.google.api.services.drive.model.File as DriveFile
 
 @HiltViewModel
 class GoogleDriveViewModel @Inject constructor(
-    private val driveService: GoogleDriveService
+    private val driveService: GoogleDriveService,
 ) : ViewModel() {
 
     private val _googleAccount = MutableStateFlow<GoogleSignInAccount?>(null)
@@ -43,7 +43,6 @@ class GoogleDriveViewModel @Inject constructor(
     // State to hold downloaded URIs ready to be passed back
     private val _downloadedUris = MutableStateFlow<List<Uri>?>(null)
     val downloadedUris: StateFlow<List<Uri>?> = _downloadedUris.asStateFlow()
-
 
     val driveScope = listOf(Scope(DriveScopes.DRIVE_READONLY)) // Match scope used in service
 
@@ -136,7 +135,7 @@ class GoogleDriveViewModel @Inject constructor(
                 }
                 Log.i("GoogleDriveVM", "Downloaded URIs: $successfulUris")
             } catch (e: Exception) {
-                 Log.e("GoogleDriveVM", "Error during file downloads", e)
+                Log.e("GoogleDriveVM", "Error during file downloads", e)
                 _error.value = "Error downloading files: ${e.localizedMessage}"
             } finally {
                 _isDownloading.value = false
@@ -144,7 +143,7 @@ class GoogleDriveViewModel @Inject constructor(
         }
     }
 
-     fun consumeDownloadedUris() {
+    fun consumeDownloadedUris() {
         _downloadedUris.value = null
     }
 }

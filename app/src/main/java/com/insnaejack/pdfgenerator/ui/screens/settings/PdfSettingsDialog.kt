@@ -22,7 +22,7 @@ fun PdfSettingsDialog(
     currentSettings: PdfSettings,
     isPremiumUser: Boolean,
     onDismissRequest: () -> Unit,
-    onSettingsChanged: (PdfSettings) -> Unit
+    onSettingsChanged: (PdfSettings) -> Unit,
 ) {
     var tempSettings by remember { mutableStateOf(currentSettings) }
 
@@ -31,16 +31,16 @@ fun PdfSettingsDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = MaterialTheme.shapes.large
+            shape = MaterialTheme.shapes.large,
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = stringResource(R.string.pdf_settings_title),
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 if (!isPremiumUser) {
@@ -48,7 +48,7 @@ fun PdfSettingsDialog(
                         text = "Upgrade to Premium to unlock these settings.", // TODO: Add to strings.xml
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
                 }
 
@@ -57,7 +57,7 @@ fun PdfSettingsDialog(
                     label = stringResource(R.string.page_size),
                     selected = tempSettings.pageSize,
                     onSelected = { tempSettings = tempSettings.copy(pageSize = it) },
-                    enabled = isPremiumUser
+                    enabled = isPremiumUser,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -66,7 +66,7 @@ fun PdfSettingsDialog(
                     label = stringResource(R.string.orientation),
                     selected = tempSettings.orientation,
                     onSelected = { tempSettings = tempSettings.copy(orientation = it) },
-                    enabled = isPremiumUser
+                    enabled = isPremiumUser,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -75,7 +75,7 @@ fun PdfSettingsDialog(
                     label = stringResource(R.string.compression_quality),
                     selected = tempSettings.imageQuality,
                     onSelected = { tempSettings = tempSettings.copy(imageQuality = it) },
-                    enabled = isPremiumUser
+                    enabled = isPremiumUser,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -83,7 +83,7 @@ fun PdfSettingsDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(stringResource(R.string.cancel))
@@ -94,7 +94,7 @@ fun PdfSettingsDialog(
                             onSettingsChanged(tempSettings)
                             onDismissRequest()
                         },
-                        enabled = isPremiumUser // Only allow saving if premium, or save but don't apply if not
+                        enabled = isPremiumUser, // Only allow saving if premium, or save but don't apply if not
                     ) {
                         Text(stringResource(R.string.save_settings))
                     }
@@ -112,14 +112,14 @@ fun <T> DropdownSelector(
     options: List<T>,
     onOptionSelected: (T) -> Unit,
     enabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { if (enabled) expanded = !expanded },
-        modifier = modifier
+        modifier = modifier,
     ) {
         OutlinedTextField(
             value = selectedValue.toString(),
@@ -130,17 +130,17 @@ fun <T> DropdownSelector(
                 Icon(
                     Icons.Filled.ArrowDropDown,
                     contentDescription = "Dropdown",
-                    Modifier.clickable(enabled = enabled) { expanded = true }
+                    Modifier.clickable(enabled = enabled) { expanded = true },
                 )
             },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
-            enabled = enabled
+            enabled = enabled,
         )
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
@@ -148,7 +148,7 @@ fun <T> DropdownSelector(
                     onClick = {
                         onOptionSelected(option)
                         expanded = false
-                    }
+                    },
                 )
             }
         }
@@ -162,18 +162,23 @@ fun PageSizeSelector(label: String, selected: PageSize, onSelected: (PageSize) -
         selectedValue = selected,
         options = PageSize.entries,
         onOptionSelected = onSelected,
-        enabled = enabled
+        enabled = enabled,
     )
 }
 
 @Composable
-fun OrientationSelector(label: String, selected: PageOrientation, onSelected: (PageOrientation) -> Unit, enabled: Boolean) {
+fun OrientationSelector(
+    label: String,
+    selected: PageOrientation,
+    onSelected: (PageOrientation) -> Unit,
+    enabled: Boolean,
+) {
     DropdownSelector(
         label = label,
         selectedValue = selected,
         options = PageOrientation.entries,
         onOptionSelected = onSelected,
-        enabled = enabled
+        enabled = enabled,
     )
 }
 
@@ -184,6 +189,6 @@ fun ImageQualitySelector(label: String, selected: ImageQuality, onSelected: (Ima
         selectedValue = selected,
         options = ImageQuality.entries,
         onOptionSelected = onSelected,
-        enabled = enabled
+        enabled = enabled,
     )
 }

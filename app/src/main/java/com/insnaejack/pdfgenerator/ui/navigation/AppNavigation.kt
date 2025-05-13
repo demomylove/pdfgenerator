@@ -1,13 +1,11 @@
 package com.insnaejack.pdfgenerator.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import android.net.Uri
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,12 +28,12 @@ object AppDestinations {
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = AppDestinations.MAIN_SCREEN_ROUTE
+    startDestination: String = AppDestinations.MAIN_SCREEN_ROUTE,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
     ) {
         composable(AppDestinations.MAIN_SCREEN_ROUTE) { backStackEntry ->
             val mainViewModel: MainScreenViewModel = hiltViewModel(backStackEntry)
@@ -71,6 +69,6 @@ fun AppNavigation(
         composable(AppDestinations.PDF_SETTINGS_ROUTE) {
             // PdfSettingsScreen(navController = navController)
         }
-        */
+         */
     }
 }

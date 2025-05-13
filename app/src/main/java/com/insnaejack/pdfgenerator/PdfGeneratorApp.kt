@@ -14,9 +14,15 @@ class PdfGeneratorApp : Application() {
             val statusMap = initializationStatus.adapterStatusMap
             for (adapterClass in statusMap.keys) {
                 val status = statusMap[adapterClass]
-                android.util.Log.d("PdfGeneratorApp", String.format(
-                    "Adapter name: %s, Description: %s, Latency: %d",
-                    adapterClass, status?.description, status?.latency))
+                android.util.Log.d(
+                    "PdfGeneratorApp",
+                    String.format(
+                        "Adapter name: %s, Description: %s, Latency: %d",
+                        adapterClass,
+                        status?.description,
+                        status?.latency,
+                    ),
+                )
             }
         }
         // Other initialization code can go here if needed
