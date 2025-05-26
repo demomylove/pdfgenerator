@@ -98,6 +98,31 @@ object PdfGeneratorUtil {
                     matrix.postTranslate(drawLeft, drawTop)
 
                     canvas.drawBitmap(originalBitmap, matrix, paint)
+
+                    // --- START: Draw Watermark ---
+                    if (settings.watermarkEnabled && !settings.watermarkText.isNullOrBlank()) {
+                        val watermarkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                            color = settings.watermarkTextColor
+                            textSize = settings.watermarkTextSize
+                            textAlign = Paint.Align.CENTER
+                            // Consider adding typeface if needed: typeface = Typeface.create(...)
+                        }
+                        // Calculate center of the page
+                        val centerX = pageInfo.pageWidth / 2f
+                        val centerY = pageInfo.pageHeight / 2f
+
+                        canvas.save() // Save current canvas state
+                        canvas.translate(centerX, centerY) // Move origin to center
+                        canvas.rotate(settings.watermarkRotation) // Rotate canvas
+                        // Draw text centered at the new origin (0,0)
+                        // Adjust Y slightly for better visual centering based on text height
+                        val textBounds = android.graphics.Rect()
+                        watermarkPaint.getTextBounds(settings.watermarkText, 0, settings.watermarkText.length, textBounds)
+                        canvas.drawText(settings.watermarkText, 0f, textBounds.height() / 2f, watermarkPaint)
+                        canvas.restore() // Restore canvas state
+                    }
+                    // --- END: Draw Watermark ---
+
                     pdfDocument.finishPage(page)
                     originalBitmap.recycle()
                     return@use true // Signal success for this URI

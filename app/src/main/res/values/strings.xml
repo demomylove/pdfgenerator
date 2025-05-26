@@ -54,6 +54,10 @@
     <string name="quality_low">Low (Smaller file size)</string>
     <string name="save_settings">Save Settings</string>
 
+<!-- Watermark Settings -->
+    <string name="watermark_settings_title">Watermark Settings</string>
+    <string name="enable_watermark">Enable Watermark</string>
+    <string name="watermark_text">Watermark Text</string>
     <!-- Cloud Import (Advanced) -->
     <string name="import_from_google_drive">Import from Google Drive</string>
     <string name="import_from_dropbox">Import from Dropbox</string>

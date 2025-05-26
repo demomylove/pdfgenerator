@@ -36,6 +36,12 @@ data class PdfSettings(
     val marginBottom: Int = 36,
     val marginLeft: Int = 36,
     val marginRight: Int = 36,
+    // Watermark Settings
+    val watermarkEnabled: Boolean = false,
+    val watermarkText: String? = "CONFIDENTIAL", // Example default text
+    val watermarkTextSize: Float = 48f, // Example size in points/pixels for canvas
+    val watermarkTextColor: Int = 0x1A000000, // Example semi-transparent black (ARGB)
+    val watermarkRotation: Float = -45f, // Example rotation angle
 ) {
     val pageDisplayWidth: Int
         get() = if (orientation == PageOrientation.PORTRAIT) pageSize.width else pageSize.height

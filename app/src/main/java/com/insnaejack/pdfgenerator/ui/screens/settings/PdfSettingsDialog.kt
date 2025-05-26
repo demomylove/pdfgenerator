@@ -79,6 +79,36 @@ fun PdfSettingsDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // --- START: Watermark Settings ---
+                Text(
+                    text = stringResource(R.string.watermark_settings_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp).align(Alignment.Start),
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                ) {
+                    Text(stringResource(R.string.enable_watermark), modifier = Modifier.weight(1f))
+                    Switch(
+                        checked = tempSettings.watermarkEnabled,
+                        onCheckedChange = { tempSettings = tempSettings.copy(watermarkEnabled = it) },
+                        enabled = isPremiumUser,
+                    )
+                }
+
+                OutlinedTextField(
+                    value = tempSettings.watermarkText ?: "",
+                    onValueChange = { tempSettings = tempSettings.copy(watermarkText = it) },
+                    label = { Text(stringResource(R.string.watermark_text)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isPremiumUser && tempSettings.watermarkEnabled, // Enable only if premium and switch is on
+                    singleLine = true,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                // --- END: Watermark Settings ---
+
                 // Margins - For simplicity, not adding UI for margins now, but can be extended.
 
                 Row(
