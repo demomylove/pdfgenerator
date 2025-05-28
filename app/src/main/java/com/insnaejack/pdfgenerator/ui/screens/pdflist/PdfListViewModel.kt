@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 // Define sorting criteria and order
 enum class SortCriteria {
-    ByName, ByDate
+    ByName, ByDate, BySize // Add BySize
 }
 
 enum class SortOrder {
@@ -60,6 +60,10 @@ class PdfListViewModel @Inject constructor(
     private val _displayedItems = MutableStateFlow<List<DisplayItem>>(emptyList())
     val displayedItems: StateFlow<List<DisplayItem>> = _displayedItems.asStateFlow()
 
+    // State for search query
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
     // Commenting out old state, replaced by displayedItems
     // private val _pdfFiles = MutableStateFlow<List<ManagedPdfFile>>(emptyList())
     // val pdfFiles: StateFlow<List<ManagedPdfFile>> = _pdfFiles.asStateFlow()
@@ -73,8 +77,14 @@ class PdfListViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             // Combine all relevant flows to trigger recalculation of displayed items
-            combine(_allPdfFiles, _currentPath, _sortCriteria, _sortOrder) { allFiles, path, criteria, order ->
-                calculateDisplayedItems(allFiles, path, criteria, order)
+            combine(
+                _allPdfFiles,
+                _currentPath,
+                _sortCriteria,
+                _sortOrder,
+                _searchQuery, // Include search query
+            ) { allFiles, path, criteria, order, query ->
+                calculateDisplayedItems(allFiles, path, criteria, order, query) // Pass query
             }.collect { items ->
                 _displayedItems.value = items
             }
@@ -82,17 +92,31 @@ class PdfListViewModel @Inject constructor(
         loadPdfFiles() // Initial load
     }
 
-    // New function to calculate items for the current path, applying sorting
+    // New function to calculate items for the current path, applying sorting and filtering
     private fun calculateDisplayedItems(
-        allFiles: List<ManagedPdfFile>,
+        allFiles: List<ManagedPdfFile>, // Receive the full list from the combine trigger
         currentPath: String,
         sortCriteria: SortCriteria,
         sortOrder: SortOrder,
+        searchQuery: String, // Add search query parameter
     ): List<DisplayItem> {
         val items = mutableListOf<DisplayItem>()
+        val normalizedQuery = searchQuery.trim().lowercase() // Normalize query for case-insensitive search
 
-        // Find subfolders directly under the current path
-        val subFolders = allFiles
+        // --- Filtering based on search query ---
+        // Filter the input allFiles list based on the query
+        val filteredFiles = if (normalizedQuery.isBlank()) {
+            allFiles // No query, use the input list
+        } else {
+            allFiles.filter {
+                it.name.lowercase().contains(normalizedQuery) // Simple name contains check
+            }
+        }
+        // --- End Filtering ---
+
+        // Find subfolders directly under the current path (using filtered files to determine relevant folders)
+        // Only show folders if search query is blank OR if a file matching the query exists within that folder structure
+        val subFolders = allFiles // Use original allFiles to discover all potential subfolders
             .filter { it.folderPath.startsWith(currentPath) && it.folderPath != currentPath } // Files in sub-paths
             .mapNotNull {
                 // Extract the part of the path immediately after currentPath
@@ -100,19 +124,24 @@ class PdfListViewModel @Inject constructor(
                 remainingPath.substringBefore('/').ifBlank { null } // Get the first segment
             }
             .distinct() // Unique folder names
+            .filter { folderName ->
+                // Keep folder if query is blank OR if any file *within* this folder path matches the query
+                normalizedQuery.isBlank() || filteredFiles.any { it.folderPath.startsWith(currentPath + folderName + "/") }
+            }
             .sorted()
             .map { folderName ->
                 DisplayItem.FolderItem(name = folderName, path = currentPath + folderName + "/")
             }
 
-        // Find files directly within the current path
-        var filesInCurrentPath = allFiles
+        // Find files directly within the current path (using the already filtered list)
+        var filesInCurrentPath = filteredFiles
             .filter { it.folderPath == currentPath }
 
         // Apply sorting to files
         filesInCurrentPath = when (sortCriteria) {
-            SortCriteria.ByName -> filesInCurrentPath.sortedBy { it.name }
+            SortCriteria.ByName -> filesInCurrentPath.sortedBy { it.name.lowercase() } // Sort case-insensitively
             SortCriteria.ByDate -> filesInCurrentPath.sortedBy { it.lastModified }
+            SortCriteria.BySize -> filesInCurrentPath.sortedBy { it.size } // Sort by size
         }
 
         filesInCurrentPath = when (sortOrder) {
@@ -151,18 +180,25 @@ class PdfListViewModel @Inject constructor(
                 // This needs integration with data persistence (DataStore/Room) later
                 _allPdfFiles.value = files?.mapNotNull { file ->
                     val authority = "${application.packageName}.provider"
-                    val uri = FileProvider.getUriForFile(application, authority, file)
-                    // Assuming files loaded directly are in root until persistence is added
-                    ManagedPdfFile(
-                        name = file.name,
-                        uri = uri,
-                        filePath = file.absolutePath,
-                        size = file.length(),
-                        lastModified = file.lastModified(),
-                        folderPath = "/", // Assign default path for now
-                    )
+                    // Handle potential FileUriExposedException if file is not accessible
+                    try {
+                        val uri = FileProvider.getUriForFile(application, authority, file)
+                        // Assuming files loaded directly are in root until persistence is added
+                        ManagedPdfFile(
+                            name = file.name,
+                            uri = uri,
+                            filePath = file.absolutePath,
+                            size = file.length(),
+                            lastModified = file.lastModified(),
+                            folderPath = "/", // Assign default path for now
+                        )
+                    } catch (e: IllegalArgumentException) {
+                        Log.e(TAG, "Error getting URI for file: ${file.absolutePath}", e)
+                        null // Skip file if URI cannot be obtained
+                    }
                 }?.toList() ?: emptyList() // Removed sorting here, will be handled in calculateDisplayedItems if needed
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to load PDF files", e)
                 _error.value = "Failed to load PDF files: ${e.message}"
                 _allPdfFiles.value = emptyList() // Clear list on error
             } finally {
@@ -178,6 +214,7 @@ class PdfListViewModel @Inject constructor(
             _currentPath.value = folderPath
         } else {
             // Handle error or log warning - invalid path format
+            Log.w(TAG, "Invalid folder path format attempted: $folderPath")
             _error.value = "Invalid folder path format: $folderPath"
         }
     }
@@ -229,13 +266,14 @@ class PdfListViewModel @Inject constructor(
     fun renamePdfFile(fileToRename: ManagedPdfFile, newName: String) {
         viewModelScope.launch {
             _error.value = null // Clear previous errors
-            if (!newName.endsWith(".pdf", ignoreCase = true)) {
+            val trimmedNewName = newName.trim() // Trim whitespace
+            if (!trimmedNewName.endsWith(".pdf", ignoreCase = true)) {
                 _error.value = "New name must end with .pdf"
                 return@launch
             }
             // Ensure newName doesn't contain path separators for logical paths
-            if (newName.isBlank() || newName.contains('/')) {
-                _error.value = "Invalid file name for logical path."
+            if (trimmedNewName.isBlank() || trimmedNewName.contains('/')) {
+                _error.value = "Invalid file name. Cannot be blank or contain '/'."
                 return@launch
             }
 
@@ -245,20 +283,20 @@ class PdfListViewModel @Inject constructor(
                 _error.value = "Cannot determine parent directory for physical file."
                 return@launch
             }
-            val newPhysicalFile = File(parentDir, newName) // Physical file rename
+            val newPhysicalFile = File(parentDir, trimmedNewName) // Physical file rename
 
-            // Check for physical file collision
-            if (newPhysicalFile.exists()) {
-                _error.value = "A physical file with the name '$newName' already exists."
+            // Check for physical file collision (case-insensitive on some systems, check explicitly)
+            if (newPhysicalFile.exists() && newPhysicalFile.canonicalPath != oldFile.canonicalPath) {
+                _error.value = "A physical file with the name '$trimmedNewName' already exists."
                 return@launch
             }
 
             // Check for logical file collision within the same folderPath
             val collisionExists = _allPdfFiles.value.any {
-                it.folderPath == fileToRename.folderPath && it.name == newName && it.filePath != fileToRename.filePath
+                it.folderPath == fileToRename.folderPath && it.name.equals(trimmedNewName, ignoreCase = true) && it.filePath != fileToRename.filePath
             }
             if (collisionExists) {
-                _error.value = "A file with the name '$newName' already exists in this folder."
+                _error.value = "A file with the name '$trimmedNewName' already exists in this folder."
                 return@launch
             }
 
@@ -272,7 +310,7 @@ class PdfListViewModel @Inject constructor(
                             // Update name, physical path, URI and potentially lastModified/size if needed
                             val newUri = FileProvider.getUriForFile(application, "${application.packageName}.provider", newPhysicalFile)
                             it.copy(
-                                name = newName,
+                                name = trimmedNewName, // Use trimmed name
                                 filePath = newPhysicalFile.absolutePath,
                                 uri = newUri,
                                 size = newPhysicalFile.length(),
@@ -300,10 +338,11 @@ class PdfListViewModel @Inject constructor(
     // Temporary function for creating a folder (validation only, no persistence)
     fun createFolder(parentPath: String, newFolderName: String) {
         _error.value = null // Clear previous errors
+        val trimmedFolderName = newFolderName.trim()
 
         // Validate name
-        if (newFolderName.isBlank() || newFolderName.contains('/')) {
-            _error.value = "Invalid folder name."
+        if (trimmedFolderName.isBlank() || trimmedFolderName.contains('/')) {
+            _error.value = "Invalid folder name. Cannot be blank or contain '/'."
             return
         }
 
@@ -312,13 +351,13 @@ class PdfListViewModel @Inject constructor(
         // A more robust check might involve directly querying _allPdfFiles based on parentPath
         val collisionExists = _displayedItems.value.any { item ->
             when (item) {
-                is DisplayItem.FolderItem -> item.name == newFolderName
-                is DisplayItem.FileItem -> item.file.name == newFolderName && item.file.folderPath == parentPath // Check files only in the target parent path
+                is DisplayItem.FolderItem -> item.name.equals(trimmedFolderName, ignoreCase = true)
+                is DisplayItem.FileItem -> item.file.name.equals(trimmedFolderName, ignoreCase = true) && item.file.folderPath == parentPath // Check files only in the target parent path
             }
         }
 
         if (collisionExists) {
-            _error.value = "A folder or file with the name '$newFolderName' already exists here."
+            _error.value = "A folder or file with the name '$trimmedFolderName' already exists here."
             return
         }
 
@@ -326,12 +365,17 @@ class PdfListViewModel @Inject constructor(
         // Since folders are derived from file paths, we don't add anything to _allPdfFiles yet.
         // The folder will appear once a file is moved into its path.
         // For now, just log success or potentially update a transient state if needed for UI feedback.
-        println("Temporary createFolder validation successful for: $parentPath$newFolderName/")
+        println("Temporary createFolder validation successful for: $parentPath$trimmedFolderName/")
         // You could set a temporary success message via another StateFlow if needed.
         // --- End Temporary Action ---
 
         // TODO: Replace temporary action with actual persistence logic (e.g., DataStore update or placeholder creation)
         // TODO: Implement moveFile function to actually put files into the new folder path.
+    }
+
+    // Function to update search query
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
     // TODO: Implement moveFile which will require data persistence logic

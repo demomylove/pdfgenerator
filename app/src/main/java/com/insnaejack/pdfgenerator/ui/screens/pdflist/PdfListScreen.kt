@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search // Import Search icon
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sort // Added import for sorting
 import androidx.compose.material3.*
@@ -45,6 +46,7 @@ fun PdfListScreen(
     val error by viewModel.error.collectAsState()
     val sortCriteria by viewModel.sortCriteria.collectAsState() // Observe sort criteria
     val sortOrder by viewModel.sortOrder.collectAsState() // Observe sort order
+    val searchQuery by viewModel.searchQuery.collectAsState() // Observe search query
 
     val context = LocalContext.current
 
@@ -108,220 +110,277 @@ fun PdfListScreen(
             )
         },
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            // Update loading/empty checks based on displayedItems
-            if (isLoading && displayedItems.isEmpty()) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (displayedItems.isEmpty()) {
-                Text(
-                    text = stringResource(id = R.string.folder_empty), // Use a more generic "empty" message or specific "folder empty"
-                    modifier = Modifier.align(Alignment.Center),
-                    fontSize = 18.sp,
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    // Iterate over displayedItems
-                    items(displayedItems, key = { item ->
-                        when (item) {
-                            is DisplayItem.FolderItem -> item.path // Use path as key for folders
-                            is DisplayItem.FileItem -> item.file.filePath // Use filePath as key for files
-                        }
-                    }) { item ->
-                        when (item) {
-                            is DisplayItem.FolderItem -> {
-                                FolderItemRow(
-                                    folderName = item.name,
-                                    onClick = { viewModel.navigateToFolder(item.path) },
-                                )
-                            }
-                            is DisplayItem.FileItem -> {
-                                val pdfFile = item.file
-                                PdfFileItem( // Reuse existing PdfFileItem composable
-                                    pdfFile = pdfFile,
-                                    onDelete = { viewModel.deletePdfFile(it) },
-                                    onRename = {
-                                        showRenameDialog = it
-                                        newFileName = it.name
-                                    },
-                                    onShare = {
-                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "application/pdf"
-                                            putExtra(Intent.EXTRA_STREAM, pdfFile.uri)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        try {
-                                            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_pdf_title)))
-                                        } catch (e: ActivityNotFoundException) {
-                                            Toast.makeText(context, context.getString(R.string.share_no_app_found), Toast.LENGTH_SHORT).show()
-                                        }
-                                    },
-                                    onView = {
-                                        val viewIntent = Intent(Intent.ACTION_VIEW).apply {
-                                            setDataAndType(pdfFile.uri, "application/pdf")
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        try {
-                                            context.startActivity(viewIntent)
-                                        } catch (e: ActivityNotFoundException) {
-                                            Toast.makeText(context, context.getString(R.string.view_no_app_found), Toast.LENGTH_SHORT).show()
-                                        }
-                                    },
-                                )
+        Column(modifier = Modifier.padding(paddingValues)) { // Use Column to stack Search and List
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { viewModel.setSearchQuery(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                label = { Text(stringResource(id = R.string.search_label)) }, // Add string resource
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true,
+            )
+
+            Box( // Keep Box for list content alignment and dialogs
+                modifier = Modifier
+                    .fillMaxSize(),
+                // .padding(paddingValues), // Padding applied to Column now
+            ) {
+                // Update loading/empty checks based on displayedItems
+                when {
+                    isLoading && displayedItems.isEmpty() -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                    displayedItems.isEmpty() && searchQuery.isBlank() -> { // Show empty only if not searching
+                        Text(
+                            text = stringResource(id = R.string.folder_empty),
+                            modifier = Modifier.align(Alignment.Center),
+                            fontSize = 18.sp,
+                        )
+                    }
+                    displayedItems.isEmpty() && searchQuery.isNotBlank() -> { // Show "no results" if searching
+                        Text(
+                            text = stringResource(id = R.string.search_no_results), // Add string resource
+                            modifier = Modifier.align(Alignment.Center),
+                            fontSize = 18.sp,
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp), // Adjust padding
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            // Iterate over displayedItems
+                            items(displayedItems, key = { item ->
+                                when (item) {
+                                    is DisplayItem.FolderItem -> item.path // Use path as key for folders
+                                    is DisplayItem.FileItem -> item.file.filePath // Use filePath as key for files
+                                }
+                            }) { item ->
+                                when (item) {
+                                    is DisplayItem.FolderItem -> {
+                                        FolderItemRow(
+                                            folderName = item.name,
+                                            onClick = { viewModel.navigateToFolder(item.path) },
+                                        )
+                                    }
+                                    is DisplayItem.FileItem -> {
+                                        val pdfFile = item.file
+                                        PdfFileItem( // Reuse existing PdfFileItem composable
+                                            pdfFile = pdfFile,
+                                            onDelete = { viewModel.deletePdfFile(it) },
+                                            onRename = {
+                                                showRenameDialog = it
+                                                newFileName = it.name
+                                            },
+                                            onShare = {
+                                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                                    type = "application/pdf"
+                                                    putExtra(Intent.EXTRA_STREAM, pdfFile.uri)
+                                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
+                                                try {
+                                                    context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_pdf_title)))
+                                                } catch (e: ActivityNotFoundException) {
+                                                    Toast.makeText(context, context.getString(R.string.share_no_app_found), Toast.LENGTH_SHORT).show()
+                                                }
+                                            },
+                                            onView = {
+                                                val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+                                                    setDataAndType(pdfFile.uri, "application/pdf")
+                                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
+                                                try {
+                                                    context.startActivity(viewIntent)
+                                                } catch (e: ActivityNotFoundException) {
+                                                    Toast.makeText(context, context.getString(R.string.view_no_app_found), Toast.LENGTH_SHORT).show()
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
+                } // End when
 
-            // Sort Dropdown Menu
-            DropdownMenu(
-                expanded = showSortMenu,
-                onDismissRequest = { showSortMenu = false },
-            ) {
-                // Sort by Name
-                DropdownMenuItem(
-                    text = { Text(stringResource(id = R.string.sort_by_name_asc)) }, // Add string resource
-                    onClick = {
-                        viewModel.setSortCriteria(SortCriteria.ByName)
-                        viewModel.setSortOrder(SortOrder.Ascending)
-                        showSortMenu = false
-                    },
-                    leadingIcon = {
-                        if (sortCriteria == SortCriteria.ByName && sortOrder == SortOrder.Ascending) {
-                            Icon(Icons.Default.Check, contentDescription = null)
-                        }
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(id = R.string.sort_by_name_desc)) }, // Add string resource
-                    onClick = {
-                        viewModel.setSortCriteria(SortCriteria.ByName)
-                        viewModel.setSortOrder(SortOrder.Descending)
-                        showSortMenu = false
-                    },
-                    leadingIcon = {
-                        if (sortCriteria == SortCriteria.ByName && sortOrder == SortOrder.Descending) {
-                            Icon(Icons.Default.Check, contentDescription = null)
-                        }
-                    },
-                )
-                Divider() // Add a visual separator
+                // --- Dialogs and Menus anchored within the Box ---
 
-                // Sort by Date
-                DropdownMenuItem(
-                    text = { Text(stringResource(id = R.string.sort_by_date_asc)) }, // Add string resource
-                    onClick = {
-                        viewModel.setSortCriteria(SortCriteria.ByDate)
-                        viewModel.setSortOrder(SortOrder.Ascending)
-                        showSortMenu = false
-                    },
-                    leadingIcon = {
-                        if (sortCriteria == SortCriteria.ByDate && sortOrder == SortOrder.Ascending) {
-                            Icon(Icons.Default.Check, contentDescription = null)
-                        }
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(id = R.string.sort_by_date_desc)) }, // Add string resource
-                    onClick = {
-                        viewModel.setSortCriteria(SortCriteria.ByDate)
-                        viewModel.setSortOrder(SortOrder.Descending)
-                        showSortMenu = false
-                    },
-                    leadingIcon = {
-                        if (sortCriteria == SortCriteria.ByDate && sortOrder == SortOrder.Descending) {
-                            Icon(Icons.Default.Check, contentDescription = null)
-                        }
-                    },
-                )
-            }
-
-            // Rename dialog remains the same for now
-            if (showRenameDialog != null) {
-                AlertDialog(
-                    onDismissRequest = { showRenameDialog = null },
-                    title = { Text(stringResource(id = R.string.rename_pdf_dialog_title)) },
-                    text = {
-                        OutlinedTextField(
-                            value = newFileName,
-                            onValueChange = { newFileName = it },
-                            label = { Text(stringResource(id = R.string.rename_pdf_new_name_label)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            showRenameDialog?.let { fileToRename ->
-                                viewModel.renamePdfFile(fileToRename, newFileName)
+                // Sort Dropdown Menu
+                // Wrap in Box for positioning if needed, but usually okay as is
+                DropdownMenu(
+                    expanded = showSortMenu,
+                    onDismissRequest = { showSortMenu = false },
+                ) {
+                    // Sort by Name
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.sort_by_name_asc)) },
+                        onClick = {
+                            viewModel.setSortCriteria(SortCriteria.ByName)
+                            viewModel.setSortOrder(SortOrder.Ascending)
+                            showSortMenu = false
+                        },
+                        leadingIcon = {
+                            if (sortCriteria == SortCriteria.ByName && sortOrder == SortOrder.Ascending) {
+                                Icon(Icons.Default.Check, contentDescription = null)
                             }
-                            showRenameDialog = null
-                        }) {
-                            Text(stringResource(id = R.string.rename_button))
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = { showRenameDialog = null }) {
-                            Text(stringResource(id = R.string.cancel_button))
-                        }
-                    },
-                )
-            }
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.sort_by_name_desc)) },
+                        onClick = {
+                            viewModel.setSortCriteria(SortCriteria.ByName)
+                            viewModel.setSortOrder(SortOrder.Descending)
+                            showSortMenu = false
+                        },
+                        leadingIcon = {
+                            if (sortCriteria == SortCriteria.ByName && sortOrder == SortOrder.Descending) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        },
+                    )
+                    Divider() // Add a visual separator
 
-            // Create Folder Dialog
-            if (showCreateFolderDialog) {
-                AlertDialog(
-                    onDismissRequest = { showCreateFolderDialog = false },
-                    title = { Text(stringResource(id = R.string.create_folder_dialog_title)) }, // Add string resource
-                    text = {
-                        OutlinedTextField(
-                            value = newFolderName,
-                            onValueChange = { newFolderName = it },
-                            label = { Text(stringResource(id = R.string.create_folder_name_label)) }, // Add string resource
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                if (newFolderName.isNotBlank() && !newFolderName.contains('/')) { // Basic validation
-                                    // TODO: Call viewModel.createFolder(currentPath, newFolderName) when implemented
-                                    println("Create folder requested: $newFolderName in path $currentPath") // Placeholder action
-                                    showCreateFolderDialog = false
-                                    newFolderName = "" // Reset name
-                                } else {
-                                    // Show error toast?
-                                    Toast.makeText(context, context.getString(R.string.invalid_folder_name), Toast.LENGTH_SHORT).show() // Add string resource
+                    // Sort by Date
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.sort_by_date_asc)) },
+                        onClick = {
+                            viewModel.setSortCriteria(SortCriteria.ByDate)
+                            viewModel.setSortOrder(SortOrder.Ascending)
+                            showSortMenu = false
+                        },
+                        leadingIcon = {
+                            if (sortCriteria == SortCriteria.ByDate && sortOrder == SortOrder.Ascending) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.sort_by_date_desc)) },
+                        onClick = {
+                            viewModel.setSortCriteria(SortCriteria.ByDate)
+                            viewModel.setSortOrder(SortOrder.Descending)
+                            showSortMenu = false
+                        },
+                        leadingIcon = {
+                            if (sortCriteria == SortCriteria.ByDate && sortOrder == SortOrder.Descending) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        },
+                    )
+                    Divider() // Add a visual separator
+
+                    // Sort by Size
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.sort_by_size_asc)) },
+                        onClick = {
+                            viewModel.setSortCriteria(SortCriteria.BySize)
+                            viewModel.setSortOrder(SortOrder.Ascending)
+                            showSortMenu = false
+                        },
+                        leadingIcon = {
+                            if (sortCriteria == SortCriteria.BySize && sortOrder == SortOrder.Ascending) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.sort_by_size_desc)) },
+                        onClick = {
+                            viewModel.setSortCriteria(SortCriteria.BySize)
+                            viewModel.setSortOrder(SortOrder.Descending)
+                            showSortMenu = false
+                        },
+                        leadingIcon = {
+                            if (sortCriteria == SortCriteria.BySize && sortOrder == SortOrder.Descending) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        },
+                    )
+                } // End DropdownMenu
+
+                // Rename dialog
+                if (showRenameDialog != null) {
+                    AlertDialog(
+                        onDismissRequest = { showRenameDialog = null },
+                        title = { Text(stringResource(id = R.string.rename_pdf_dialog_title)) },
+                        text = {
+                            OutlinedTextField(
+                                value = newFileName,
+                                onValueChange = { newFileName = it },
+                                label = { Text(stringResource(id = R.string.rename_pdf_new_name_label)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                showRenameDialog?.let { fileToRename ->
+                                    viewModel.renamePdfFile(fileToRename, newFileName)
                                 }
-                            },
-                            // Enable button only if name is not blank and valid
-                            enabled = newFolderName.isNotBlank() && !newFolderName.contains('/'),
-                        ) {
-                            Text(stringResource(id = R.string.create_button)) // Add string resource
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = {
-                            showCreateFolderDialog = false
-                            newFolderName = "" // Reset name
-                        }) {
-                            Text(stringResource(id = R.string.cancel_button))
-                        }
-                    },
-                )
-            }
-        }
-    }
-}
+                                showRenameDialog = null
+                            }) {
+                                Text(stringResource(id = R.string.rename_button))
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showRenameDialog = null }) {
+                                Text(stringResource(id = R.string.cancel_button))
+                            }
+                        },
+                    )
+                } // End Rename Dialog
+
+                // Create Folder Dialog
+                if (showCreateFolderDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showCreateFolderDialog = false },
+                        title = { Text(stringResource(id = R.string.create_folder_dialog_title)) },
+                        text = {
+                            OutlinedTextField(
+                                value = newFolderName,
+                                onValueChange = { newFolderName = it },
+                                label = { Text(stringResource(id = R.string.create_folder_name_label)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    if (newFolderName.isNotBlank() && !newFolderName.contains('/')) { // Basic validation
+                                        // TODO: Call viewModel.createFolder(currentPath, newFolderName) when implemented
+                                        println("Create folder requested: $newFolderName in path $currentPath") // Placeholder action
+                                        showCreateFolderDialog = false
+                                        newFolderName = "" // Reset name
+                                    } else {
+                                        // Show error toast?
+                                        Toast.makeText(context, context.getString(R.string.invalid_folder_name), Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                // Enable button only if name is not blank and valid
+                                enabled = newFolderName.isNotBlank() && !newFolderName.contains('/'),
+                            ) {
+                                Text(stringResource(id = R.string.create_button))
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = {
+                                showCreateFolderDialog = false
+                                newFolderName = "" // Reset name
+                            }) {
+                                Text(stringResource(id = R.string.cancel_button))
+                            }
+                        },
+                    )
+                } // End Create Folder Dialog
+            } // End Box
+        } // End Column
+    } // End Scaffold lambda
+} // End PdfListScreen Composable Function
 
 @Composable
 fun PdfFileItem(
@@ -366,7 +425,7 @@ fun PdfFileItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Box {
+            Box { // Use Box for the dropdown anchor
                 IconButton(onClick = { expanded = true }) {
                     Icon(Icons.Filled.MoreVert, contentDescription = stringResource(id = R.string.more_options_desc))
                 }
@@ -398,11 +457,11 @@ fun PdfFileItem(
                         },
                         leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
                     )
-                }
-            }
-        }
-    }
-}
+                } // End DropdownMenu
+            } // End Box for dropdown anchor
+        } // End Row
+    } // End Card
+} // End PdfFileItem
 
 // New Composable for displaying a folder item
 @Composable
@@ -435,6 +494,6 @@ fun FolderItemRow(
                 fontWeight = FontWeight.Medium,
             )
             // Optionally add a > icon or similar at the end
-        }
-    }
-}
+        } // End Row
+    } // End Card
+} // End FolderItemRow

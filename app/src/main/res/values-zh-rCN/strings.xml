@@ -109,4 +109,10 @@
     <string name="sort_by_name_desc">按名称排序 (Z-A)</string>
     <string name="sort_by_date_asc">按日期排序 (旧->新)</string>
     <string name="sort_by_date_desc">按日期排序 (新->旧)</string>
+    <!-- PDF List Screen - Sorting (Added) -->
+    <string name="sort_by_size_asc">按大小排序 (从小到大)</string>
+    <string name="sort_by_size_desc">按大小排序 (从大到小)</string>
+    <!-- PDF List Screen - Search (Added) -->
+    <string name="search_label">搜索文件...</string>
+    <string name="search_no_results">未找到匹配的文件</string>
 </resources>

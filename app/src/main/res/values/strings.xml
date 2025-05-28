@@ -109,4 +109,9 @@
     <string name="sort_by_name_desc">Sort by Name (Z-A)</string>
     <string name="sort_by_date_asc">Sort by Date (Oldest first)</string>
     <string name="sort_by_date_desc">Sort by Date (Newest first)</string>
+    <string name="sort_by_size_asc">Sort by Size (Smallest first)</string>
+    <string name="sort_by_size_desc">Sort by Size (Largest first)</string>
+    <!-- PDF List Screen - Search -->
+    <string name="search_label">Search files...</string>
+    <string name="search_no_results">No files match your search</string>
 </resources>
