@@ -542,110 +542,105 @@ fun MainScreen(navController: NavController, viewModel: MainScreenViewModel = hi
                  */
             }
 
-            Row(
+            // Card for Action Buttons
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
-                Button(
-                    /**
-                     * Dialog for configuring PDF generation settings (e.g., page size,
-                     * orientation, quality). Shown when `showPdfSettingsDialog` is true. Passes
-                     * current settings and premium status to the dialog. Updates settings in
-                     * the ViewModel when changes are applied. Shows a Toast message indicating
-                     * update success or prompting for premium upgrade.
-                     */
-                    onClick = {
-                        when {
-                            cameraPermissionState.status.isGranted ->
-                                viewModel.onTakePhotoClicked(true)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Button(
+                            onClick = {
+                                when {
+                                    cameraPermissionState.status.isGranted ->
+                                        viewModel.onTakePhotoClicked(true)
 
-                            cameraPermissionState.status.shouldShowRationale ->
-                                showCameraRationaleDialog = true
+                                    cameraPermissionState.status.shouldShowRationale ->
+                                        showCameraRationaleDialog = true
 
-                            else -> cameraPermissionState.launchPermissionRequest()
+                                    else -> cameraPermissionState.launchPermissionRequest()
+                                }
+                            },
+                            modifier = Modifier.weight(1f).padding(end = 8.dp),
+                            enabled = !isCreatingPdf,
+                        ) {
+                            Icon(
+                                Icons.Filled.PhotoCamera,
+                                contentDescription = stringResource(R.string.take_photo),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.take_photo))
                         }
-                    },
-                    modifier = Modifier.weight(1f).padding(end = 8.dp),
-                    enabled = !isCreatingPdf,
-                ) {
-                    Icon(
-                        Icons.Filled.PhotoCamera,
-                        contentDescription = stringResource(R.string.take_photo),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.take_photo))
-                }
-                /**
-                 * Dialog for adjusting the brightness and contrast of a selected image. Shown when
-                 * `showBrightnessContrastDialogState` is true and an image URI is available in
-                 * `imageToEditForAdjustment`. Passes the image URI, loading state, and error state
-                 * to the dialog. Calls ViewModel functions to apply changes or dismiss the dialog.
-                 */
-                Button(
-                    onClick = {
-                        Log.d("GalleryClick", "Select from Gallery clicked.")
-                        when {
-                            storagePermissionsState.allPermissionsGranted -> {
-                                Log.d(
-                                    "GalleryClick",
-                                    "Permissions GRANTED. Calling viewModel.onSelectFromGalleryClicked(true)",
-                                )
-                                viewModel.onSelectFromGalleryClicked(true)
-                            }
+                        Button(
+                            onClick = {
+                                Log.d("GalleryClick", "Select from Gallery clicked.")
+                                when {
+                                    storagePermissionsState.allPermissionsGranted -> {
+                                        Log.d(
+                                            "GalleryClick",
+                                            "Permissions GRANTED. Calling viewModel.onSelectFromGalleryClicked(true)",
+                                        )
+                                        viewModel.onSelectFromGalleryClicked(true)
+                                    }
 
-                            storagePermissionsState.permissions.any {
-                                it.status.shouldShowRationale
-                            } -> {
-                                Log.d("GalleryClick", "Permissions RATIONALE. Showing dialog.")
-                                showStorageRationaleDialog = true
-                            }
+                                    storagePermissionsState.permissions.any {
+                                        it.status.shouldShowRationale
+                                    } -> {
+                                        Log.d("GalleryClick", "Permissions RATIONALE. Showing dialog.")
+                                        showStorageRationaleDialog = true
+                                    }
 
-                            else -> {
-                                Log.d(
-                                    "GalleryClick",
-                                    "Permissions NOT GRANTED. Launching request.",
-                                )
-                                storagePermissionsState.launchMultiplePermissionRequest()
-                            }
+                                    else -> {
+                                        Log.d(
+                                            "GalleryClick",
+                                            "Permissions NOT GRANTED. Launching request.",
+                                        )
+                                        storagePermissionsState.launchMultiplePermissionRequest()
+                                    }
+                                }
+                            },
+                            modifier = Modifier.weight(1f).padding(start = 8.dp),
+                            enabled = !isCreatingPdf,
+                        ) {
+                            Icon(
+                                Icons.Filled.PhotoLibrary,
+                                contentDescription = stringResource(R.string.select_from_gallery),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.select_from_gallery))
                         }
-                    },
-                    modifier = Modifier.weight(1f).padding(start = 8.dp),
-                    enabled = !isCreatingPdf,
-                ) {
-                    Icon(
-                        Icons.Filled.PhotoLibrary,
-                        contentDescription = stringResource(R.string.select_from_gallery),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.select_from_gallery))
+                    }
+
+                    // Add Google Drive Button for Premium Users inside the Card
+                    if (isPremiumUser) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                // Navigate to Google Drive Screen
+                                navController.navigate(
+                                    com.insnaejack.pdfgenerator.ui.navigation.AppDestinations
+                                        .GOOGLE_DRIVE_ROUTE,
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(), // Or adjust width as needed
+                        ) {
+                            // Consider adding a Google Drive icon
+                            Icon(
+                                Icons.Filled.CloudDownload,
+                                contentDescription = stringResource(R.string.import_from_google_drive),
+                            ) // Placeholder icon
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.import_from_google_drive))
+                        }
+                    }
                 }
             }
 
-            // Add Google Drive Button for Premium Users
-            if (isPremiumUser) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        // Navigate to Google Drive Screen
-                        navController.navigate(
-                            com.insnaejack.pdfgenerator.ui.navigation.AppDestinations
-                                .GOOGLE_DRIVE_ROUTE,
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(), // Or adjust width as needed
-                ) {
-                    // Consider adding a Google Drive icon
-                    Icon(
-                        Icons.Filled.CloudDownload,
-                        contentDescription = stringResource(R.string.import_from_google_drive),
-                    ) // Placeholder icon
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.import_from_google_drive))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp)) // Increased spacing after the card
 
             if (isCreatingPdf) {
                 CircularProgressIndicator(modifier = Modifier.padding(vertical = 20.dp))
@@ -688,9 +683,10 @@ fun MainScreen(navController: NavController, viewModel: MainScreenViewModel = hi
                     Icon(
                         Icons.Filled.AddAPhoto,
                         contentDescription = "No images selected",
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(56.dp), // Slightly smaller icon
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    Spacer(modifier = Modifier.height(8.dp)) // Add space below icon
                     Text(
                         stringResource(R.string.no_images_selected),
                         style = MaterialTheme.typography.bodyLarge,
@@ -803,7 +799,7 @@ fun SelectedImageItem(
                 .padding(2.dp)
                 .size(24.dp)
                 .background(
-                    MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), // Increased alpha
                     shape = CircleShape,
                 ),
         ) {
@@ -820,7 +816,7 @@ fun SelectedImageItem(
             modifier =
             Modifier.align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)) // Increased alpha
                 .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
