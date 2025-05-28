@@ -8,4 +8,5 @@ data class ManagedPdfFile(
     val filePath: String, // Actual file path for internal management
     val size: Long, // Size in bytes
     val lastModified: Long, // Timestamp of last modification
+    val folderPath: String = "/", // Logical path within the app's managed storage, default to root
 )

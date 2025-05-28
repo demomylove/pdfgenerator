@@ -94,4 +94,13 @@
     <string name="view_my_pdfs_action">View My PDFs</string>
     <string name="back_button_desc">Back</string>
 
+    <!-- PDF List Screen - Folder Management -->
+    <string name="up_folder_desc">Navigate Up</string>
+    <string name="folder_empty">This folder is empty</string>
+    <string name="folder_icon_desc">Folder</string>
+    <string name="create_folder_desc">Create New Folder</string>
+    <string name="create_folder_dialog_title">Create New Folder</string>
+    <string name="create_folder_name_label">Folder Name</string>
+    <string name="invalid_folder_name">Invalid folder name</string>
+    <string name="create_button">Create</string>
 </resources>

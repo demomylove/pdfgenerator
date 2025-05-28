@@ -10,7 +10,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CreateNewFolder // Added import
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Folder // Added import
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -23,8 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.insnaejack.pdfgenerator.R // Assuming you have string resources
+import com.insnaejack.pdfgenerator.R
 import com.insnaejack.pdfgenerator.model.ManagedPdfFile
+import com.insnaejack.pdfgenerator.ui.screens.pdflist.DisplayItem // Added import
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,15 +36,21 @@ import java.util.*
 @Composable
 fun PdfListScreen(
     viewModel: PdfListViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit, // Example for navigation
+    onNavigateBack: () -> Unit,
 ) {
-    val pdfFiles by viewModel.pdfFiles.collectAsState()
+    // Observe new state properties
+    val displayedItems by viewModel.displayedItems.collectAsState()
+    val currentPath by viewModel.currentPath.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val context = LocalContext.current
 
     var showRenameDialog by remember { mutableStateOf<ManagedPdfFile?>(null) }
     var newFileName by remember { mutableStateOf("") }
+    // State for Create Folder Dialog
+    var showCreateFolderDialog by remember { mutableStateOf(false) }
+    var newFolderName by remember { mutableStateOf("") }
+
 
     LaunchedEffect(error) {
         error?.let {
@@ -52,15 +62,35 @@ fun PdfListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = R.string.pdf_list_screen_title)) },
+                // Display current path, maybe shorten it if too long
+                title = { Text(currentPath.ifEmpty { "/" }) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back_button_desc),
-                        )
+                    // Show back arrow only if not in root folder
+                    if (currentPath != "/") {
+                        IconButton(onClick = { viewModel.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.up_folder_desc), // Add new string resource
+                            )
+                        }
+                    } else {
+                        // In root folder, use the original back navigation
+                         IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.back_button_desc),
+                            )
+                        }
                     }
                 },
+                actions = {
+                    IconButton(onClick = { showCreateFolderDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.CreateNewFolder,
+                            contentDescription = stringResource(id = R.string.create_folder_desc) // Add string resource
+                        )
+                    }
+                }
             )
         },
     ) { paddingValues ->
@@ -69,11 +99,12 @@ fun PdfListScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            if (isLoading && pdfFiles.isEmpty()) {
+            // Update loading/empty checks based on displayedItems
+            if (isLoading && displayedItems.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (pdfFiles.isEmpty()) {
+            } else if (displayedItems.isEmpty()) {
                 Text(
-                    text = stringResource(id = R.string.pdf_list_empty), // Replace with actual string resource
+                    text = stringResource(id = R.string.folder_empty), // Use a more generic "empty" message or specific "folder empty"
                     modifier = Modifier.align(Alignment.Center),
                     fontSize = 18.sp,
                 )
@@ -83,42 +114,60 @@ fun PdfListScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    items(pdfFiles, key = { it.filePath }) { pdfFile ->
-                        PdfFileItem(
-                            pdfFile = pdfFile,
-                            onDelete = { viewModel.deletePdfFile(it) },
-                            onRename = {
-                                showRenameDialog = it
-                                newFileName = it.name
-                            },
-                            onShare = {
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "application/pdf"
-                                    putExtra(Intent.EXTRA_STREAM, pdfFile.uri)
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                try {
-                                    context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_pdf_title)))
-                                } catch (e: ActivityNotFoundException) {
-                                    Toast.makeText(context, context.getString(R.string.share_no_app_found), Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            onView = {
-                                val viewIntent = Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(pdfFile.uri, "application/pdf")
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                try {
-                                    context.startActivity(viewIntent)
-                                } catch (e: ActivityNotFoundException) {
-                                    Toast.makeText(context, context.getString(R.string.view_no_app_found), Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                        )
+                    // Iterate over displayedItems
+                    items(displayedItems, key = { item ->
+                        when (item) {
+                            is DisplayItem.FolderItem -> item.path // Use path as key for folders
+                            is DisplayItem.FileItem -> item.file.filePath // Use filePath as key for files
+                        }
+                    }) { item ->
+                        when (item) {
+                            is DisplayItem.FolderItem -> {
+                                FolderItemRow(
+                                    folderName = item.name,
+                                    onClick = { viewModel.navigateToFolder(item.path) }
+                                )
+                            }
+                            is DisplayItem.FileItem -> {
+                                val pdfFile = item.file
+                                PdfFileItem( // Reuse existing PdfFileItem composable
+                                    pdfFile = pdfFile,
+                                    onDelete = { viewModel.deletePdfFile(it) },
+                                    onRename = {
+                                        showRenameDialog = it
+                                        newFileName = it.name
+                                    },
+                                    onShare = {
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "application/pdf"
+                                            putExtra(Intent.EXTRA_STREAM, pdfFile.uri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        try {
+                                            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_pdf_title)))
+                                        } catch (e: ActivityNotFoundException) {
+                                            Toast.makeText(context, context.getString(R.string.share_no_app_found), Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    onView = {
+                                        val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+                                            setDataAndType(pdfFile.uri, "application/pdf")
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        try {
+                                            context.startActivity(viewIntent)
+                                        } catch (e: ActivityNotFoundException) {
+                                            Toast.makeText(context, context.getString(R.string.view_no_app_found), Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
             }
 
+            // Rename dialog remains the same for now
             if (showRenameDialog != null) {
                 AlertDialog(
                     onDismissRequest = { showRenameDialog = null },
@@ -147,6 +196,50 @@ fun PdfListScreen(
                             Text(stringResource(id = R.string.cancel_button))
                         }
                     },
+                )
+            }
+
+            // Create Folder Dialog
+            if (showCreateFolderDialog) {
+                AlertDialog(
+                    onDismissRequest = { showCreateFolderDialog = false },
+                    title = { Text(stringResource(id = R.string.create_folder_dialog_title)) }, // Add string resource
+                    text = {
+                        OutlinedTextField(
+                            value = newFolderName,
+                            onValueChange = { newFolderName = it },
+                            label = { Text(stringResource(id = R.string.create_folder_name_label)) }, // Add string resource
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                if (newFolderName.isNotBlank() && !newFolderName.contains('/')) { // Basic validation
+                                    // TODO: Call viewModel.createFolder(currentPath, newFolderName) when implemented
+                                    println("Create folder requested: $newFolderName in path $currentPath") // Placeholder action
+                                    showCreateFolderDialog = false
+                                    newFolderName = "" // Reset name
+                                } else {
+                                    // Show error toast?
+                                    Toast.makeText(context, context.getString(R.string.invalid_folder_name), Toast.LENGTH_SHORT).show() // Add string resource
+                                }
+                            },
+                            // Enable button only if name is not blank and valid
+                            enabled = newFolderName.isNotBlank() && !newFolderName.contains('/')
+                        ) {
+                            Text(stringResource(id = R.string.create_button)) // Add string resource
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {
+                            showCreateFolderDialog = false
+                            newFolderName = "" // Reset name
+                        }) {
+                            Text(stringResource(id = R.string.cancel_button))
+                        }
+                    }
                 )
             }
         }
@@ -230,6 +323,41 @@ fun PdfFileItem(
                     )
                 }
             }
+        }
+    }
+}
+
+// New Composable for displaying a folder item
+@Composable
+fun FolderItemRow(
+    folderName: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // Slightly less elevation than files?
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp) // Adjust padding as needed
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Folder,
+                contentDescription = stringResource(id = R.string.folder_icon_desc), // Add string resource
+                modifier = Modifier.size(40.dp), // Adjust size
+                tint = MaterialTheme.colorScheme.secondary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = folderName,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+            // Optionally add a > icon or similar at the end
         }
     }
 }

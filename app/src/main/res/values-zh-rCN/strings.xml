@@ -94,4 +94,13 @@
     <string name="view_my_pdfs_action">查看我的 PDF</string>
     <string name="back_button_desc">返回</string>
 
+<!-- PDF 列表屏幕 - 文件夹管理 -->
+    <string name="up_folder_desc">返回上一级</string>
+    <string name="folder_empty">此文件夹为空</string>
+    <string name="folder_icon_desc">文件夹</string>
+    <string name="create_folder_desc">创建新文件夹</string>
+    <string name="create_folder_dialog_title">创建新文件夹</string>
+    <string name="create_folder_name_label">文件夹名称</string>
+    <string name="invalid_folder_name">无效的文件夹名称</string>
+    <string name="create_button">创建</string>
 </resources>
