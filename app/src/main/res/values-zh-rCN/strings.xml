@@ -103,4 +103,10 @@
     <string name="create_folder_name_label">文件夹名称</string>
     <string name="invalid_folder_name">无效的文件夹名称</string>
     <string name="create_button">创建</string>
+<!-- PDF 列表屏幕 - 排序 -->
+    <string name="sort_button_desc">排序文件</string>
+    <string name="sort_by_name_asc">按名称排序 (A-Z)</string>
+    <string name="sort_by_name_desc">按名称排序 (Z-A)</string>
+    <string name="sort_by_date_asc">按日期排序 (旧->新)</string>
+    <string name="sort_by_date_desc">按日期排序 (新->旧)</string>
 </resources>

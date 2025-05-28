@@ -14,6 +14,15 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+// Define sorting criteria and order
+enum class SortCriteria {
+    ByName, ByDate
+}
+
+enum class SortOrder {
+    Ascending, Descending
+}
+
 // Define a constant for the directory where PDFs are stored.
 // This should ideally be a more robust solution, perhaps configured elsewhere
 // or using app-specific directories.
@@ -25,7 +34,6 @@ sealed class DisplayItem {
     data class FileItem(val file: ManagedPdfFile) : DisplayItem()
 }
 
-
 @HiltViewModel
 class PdfListViewModel @Inject constructor(
     private val application: Application,
@@ -34,6 +42,13 @@ class PdfListViewModel @Inject constructor(
     // State for the current logical path
     private val _currentPath = MutableStateFlow("/")
     val currentPath: StateFlow<String> = _currentPath.asStateFlow()
+
+    // State for sorting
+    private val _sortCriteria = MutableStateFlow(SortCriteria.ByDate) // Default sort by date
+    val sortCriteria: StateFlow<SortCriteria> = _sortCriteria.asStateFlow()
+
+    private val _sortOrder = MutableStateFlow(SortOrder.Descending) // Default sort descending
+    val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
 
     // Holds ALL managed files, regardless of folder
     private val _allPdfFiles = MutableStateFlow<List<ManagedPdfFile>>(emptyList())
@@ -53,10 +68,10 @@ class PdfListViewModel @Inject constructor(
     val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        // Combine flows to update displayedItems whenever allFiles or currentPath changes
         viewModelScope.launch {
-            _allPdfFiles.combine(_currentPath) { allFiles, path ->
-                calculateDisplayedItems(allFiles, path)
+            // Combine all relevant flows to trigger recalculation of displayed items
+            combine(_allPdfFiles, _currentPath, _sortCriteria, _sortOrder) { allFiles, path, criteria, order ->
+                calculateDisplayedItems(allFiles, path, criteria, order)
             }.collect { items ->
                 _displayedItems.value = items
             }
@@ -64,8 +79,13 @@ class PdfListViewModel @Inject constructor(
         loadPdfFiles() // Initial load
     }
 
-    // New function to calculate items for the current path
-    private fun calculateDisplayedItems(allFiles: List<ManagedPdfFile>, currentPath: String): List<DisplayItem> {
+    // New function to calculate items for the current path, applying sorting
+    private fun calculateDisplayedItems(
+        allFiles: List<ManagedPdfFile>,
+        currentPath: String,
+        sortCriteria: SortCriteria,
+        sortOrder: SortOrder,
+    ): List<DisplayItem> {
         val items = mutableListOf<DisplayItem>()
 
         // Find subfolders directly under the current path
@@ -83,16 +103,35 @@ class PdfListViewModel @Inject constructor(
             }
 
         // Find files directly within the current path
-        val filesInCurrentPath = allFiles
+        var filesInCurrentPath = allFiles
             .filter { it.folderPath == currentPath }
-            .sortedByDescending { it.lastModified } // Keep original sorting for files
-            .map { DisplayItem.FileItem(it) }
+
+        // Apply sorting to files
+        filesInCurrentPath = when (sortCriteria) {
+            SortCriteria.ByName -> filesInCurrentPath.sortedBy { it.name }
+            SortCriteria.ByDate -> filesInCurrentPath.sortedBy { it.lastModified }
+        }
+
+        filesInCurrentPath = when (sortOrder) {
+            SortOrder.Ascending -> filesInCurrentPath
+            SortOrder.Descending -> filesInCurrentPath.reversed()
+        }
+
+        val fileItems = filesInCurrentPath.map { DisplayItem.FileItem(it) }
 
         items.addAll(subFolders)
-        items.addAll(filesInCurrentPath)
+        items.addAll(fileItems) // Add sorted file items
         return items
     }
 
+    // Functions to update sorting state
+    fun setSortCriteria(criteria: SortCriteria) {
+        _sortCriteria.value = criteria
+    }
+
+    fun setSortOrder(order: SortOrder) {
+        _sortOrder.value = order
+    }
 
     // Modify loadPdfFiles to populate _allPdfFiles
     fun loadPdfFiles() {
@@ -117,10 +156,9 @@ class PdfListViewModel @Inject constructor(
                         filePath = file.absolutePath,
                         size = file.length(),
                         lastModified = file.lastModified(),
-                        folderPath = "/" // Assign default path for now
+                        folderPath = "/", // Assign default path for now
                     )
                 }?.toList() ?: emptyList() // Removed sorting here, will be handled in calculateDisplayedItems if needed
-
             } catch (e: Exception) {
                 _error.value = "Failed to load PDF files: ${e.message}"
                 _allPdfFiles.value = emptyList() // Clear list on error
@@ -134,7 +172,7 @@ class PdfListViewModel @Inject constructor(
     fun navigateToFolder(folderPath: String) {
         // Basic validation: ensure it's a valid folder path format
         if (folderPath.endsWith("/") && folderPath.startsWith("/")) {
-             _currentPath.value = folderPath
+            _currentPath.value = folderPath
         } else {
             // Handle error or log warning - invalid path format
             _error.value = "Invalid folder path format: $folderPath"
@@ -146,11 +184,10 @@ class PdfListViewModel @Inject constructor(
         if (current != "/") {
             // Find the parent path by removing the last segment
             val parentPath = current.trimEnd('/').substringBeforeLast('/', "/") + "/"
-             _currentPath.value = parentPath
+            _currentPath.value = parentPath
         }
         // Cannot go up from root "/"
     }
-
 
     // Update deletePdfFile to modify _allPdfFiles
     fun deletePdfFile(fileToDelete: ManagedPdfFile) {
@@ -168,7 +205,7 @@ class PdfListViewModel @Inject constructor(
                 } else {
                     _error.value = "File not found: ${fileToDelete.name}"
                     // Also remove from list if it's somehow there but doesn't exist
-                     _allPdfFiles.value = _allPdfFiles.value.filterNot { it.filePath == fileToDelete.filePath }
+                    _allPdfFiles.value = _allPdfFiles.value.filterNot { it.filePath == fileToDelete.filePath }
                 }
             } catch (e: Exception) {
                 _error.value = "Error deleting file ${fileToDelete.name}: ${e.message}"
@@ -209,10 +246,9 @@ class PdfListViewModel @Inject constructor(
                 it.folderPath == fileToRename.folderPath && it.name == newName && it.filePath != fileToRename.filePath
             }
             if (collisionExists) {
-                 _error.value = "A file with the name '$newName' already exists in this folder."
-                 return@launch
+                _error.value = "A file with the name '$newName' already exists in this folder."
+                return@launch
             }
-
 
             try {
                 if (oldFile.renameTo(newPhysicalFile)) {
@@ -250,7 +286,7 @@ class PdfListViewModel @Inject constructor(
         // Note: This assumes calculateDisplayedItems is up-to-date for the parentPath
         // A more robust check might involve directly querying _allPdfFiles based on parentPath
         val collisionExists = _displayedItems.value.any { item ->
-            when(item) {
+            when (item) {
                 is DisplayItem.FolderItem -> item.name == newFolderName
                 is DisplayItem.FileItem -> item.file.name == newFolderName && item.file.folderPath == parentPath // Check files only in the target parent path
             }

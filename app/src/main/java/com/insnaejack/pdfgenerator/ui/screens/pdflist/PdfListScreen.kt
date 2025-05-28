@@ -9,13 +9,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.CreateNewFolder // Added import
+import androidx.compose.material.icons.filled.Check // Added import for check icon
+import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder // Added import
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Sort // Added import for sorting
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.insnaejack.pdfgenerator.R
 import com.insnaejack.pdfgenerator.model.ManagedPdfFile
-import com.insnaejack.pdfgenerator.ui.screens.pdflist.DisplayItem // Added import
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,11 +38,14 @@ fun PdfListScreen(
     viewModel: PdfListViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
 ) {
-    // Observe new state properties
+    // Observe state properties from ViewModel
     val displayedItems by viewModel.displayedItems.collectAsState()
     val currentPath by viewModel.currentPath.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val sortCriteria by viewModel.sortCriteria.collectAsState() // Observe sort criteria
+    val sortOrder by viewModel.sortOrder.collectAsState() // Observe sort order
+
     val context = LocalContext.current
 
     var showRenameDialog by remember { mutableStateOf<ManagedPdfFile?>(null) }
@@ -51,6 +54,8 @@ fun PdfListScreen(
     var showCreateFolderDialog by remember { mutableStateOf(false) }
     var newFolderName by remember { mutableStateOf("") }
 
+    // State for Sort Menu
+    var showSortMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(error) {
         error?.let {
@@ -75,7 +80,7 @@ fun PdfListScreen(
                         }
                     } else {
                         // In root folder, use the original back navigation
-                         IconButton(onClick = onNavigateBack) {
+                        IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.back_button_desc),
@@ -84,13 +89,22 @@ fun PdfListScreen(
                     }
                 },
                 actions = {
+                    // Sort Button
+                    IconButton(onClick = { showSortMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Sort,
+                            contentDescription = stringResource(id = R.string.sort_button_desc), // Add string resource
+                        )
+                    }
+
+                    // Create Folder Button
                     IconButton(onClick = { showCreateFolderDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.CreateNewFolder,
-                            contentDescription = stringResource(id = R.string.create_folder_desc) // Add string resource
+                            contentDescription = stringResource(id = R.string.create_folder_desc), // Add string resource
                         )
                     }
-                }
+                },
             )
         },
     ) { paddingValues ->
@@ -125,7 +139,7 @@ fun PdfListScreen(
                             is DisplayItem.FolderItem -> {
                                 FolderItemRow(
                                     folderName = item.name,
-                                    onClick = { viewModel.navigateToFolder(item.path) }
+                                    onClick = { viewModel.navigateToFolder(item.path) },
                                 )
                             }
                             is DisplayItem.FileItem -> {
@@ -165,6 +179,69 @@ fun PdfListScreen(
                         }
                     }
                 }
+            }
+
+            // Sort Dropdown Menu
+            DropdownMenu(
+                expanded = showSortMenu,
+                onDismissRequest = { showSortMenu = false },
+            ) {
+                // Sort by Name
+                DropdownMenuItem(
+                    text = { Text(stringResource(id = R.string.sort_by_name_asc)) }, // Add string resource
+                    onClick = {
+                        viewModel.setSortCriteria(SortCriteria.ByName)
+                        viewModel.setSortOrder(SortOrder.Ascending)
+                        showSortMenu = false
+                    },
+                    leadingIcon = {
+                        if (sortCriteria == SortCriteria.ByName && sortOrder == SortOrder.Ascending) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(id = R.string.sort_by_name_desc)) }, // Add string resource
+                    onClick = {
+                        viewModel.setSortCriteria(SortCriteria.ByName)
+                        viewModel.setSortOrder(SortOrder.Descending)
+                        showSortMenu = false
+                    },
+                    leadingIcon = {
+                        if (sortCriteria == SortCriteria.ByName && sortOrder == SortOrder.Descending) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                    },
+                )
+                Divider() // Add a visual separator
+
+                // Sort by Date
+                DropdownMenuItem(
+                    text = { Text(stringResource(id = R.string.sort_by_date_asc)) }, // Add string resource
+                    onClick = {
+                        viewModel.setSortCriteria(SortCriteria.ByDate)
+                        viewModel.setSortOrder(SortOrder.Ascending)
+                        showSortMenu = false
+                    },
+                    leadingIcon = {
+                        if (sortCriteria == SortCriteria.ByDate && sortOrder == SortOrder.Ascending) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(id = R.string.sort_by_date_desc)) }, // Add string resource
+                    onClick = {
+                        viewModel.setSortCriteria(SortCriteria.ByDate)
+                        viewModel.setSortOrder(SortOrder.Descending)
+                        showSortMenu = false
+                    },
+                    leadingIcon = {
+                        if (sortCriteria == SortCriteria.ByDate && sortOrder == SortOrder.Descending) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                    },
+                )
             }
 
             // Rename dialog remains the same for now
@@ -227,7 +304,7 @@ fun PdfListScreen(
                                 }
                             },
                             // Enable button only if name is not blank and valid
-                            enabled = newFolderName.isNotBlank() && !newFolderName.contains('/')
+                            enabled = newFolderName.isNotBlank() && !newFolderName.contains('/'),
                         ) {
                             Text(stringResource(id = R.string.create_button)) // Add string resource
                         }
@@ -239,7 +316,7 @@ fun PdfListScreen(
                         }) {
                             Text(stringResource(id = R.string.cancel_button))
                         }
-                    }
+                    },
                 )
             }
         }
@@ -331,31 +408,31 @@ fun PdfFileItem(
 @Composable
 fun FolderItemRow(
     folderName: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // Slightly less elevation than files?
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp), // Slightly less elevation than files?
     ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 12.dp) // Adjust padding as needed
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.Folder,
                 contentDescription = stringResource(id = R.string.folder_icon_desc), // Add string resource
                 modifier = Modifier.size(40.dp), // Adjust size
-                tint = MaterialTheme.colorScheme.secondary
+                tint = MaterialTheme.colorScheme.secondary,
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = folderName,
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
             // Optionally add a > icon or similar at the end
         }

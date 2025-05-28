@@ -103,4 +103,10 @@
     <string name="create_folder_name_label">Folder Name</string>
     <string name="invalid_folder_name">Invalid folder name</string>
     <string name="create_button">Create</string>
+<!-- PDF List Screen - Sorting -->
+    <string name="sort_button_desc">Sort files</string>
+    <string name="sort_by_name_asc">Sort by Name (A-Z)</string>
+    <string name="sort_by_name_desc">Sort by Name (Z-A)</string>
+    <string name="sort_by_date_asc">Sort by Date (Oldest first)</string>
+    <string name="sort_by_date_desc">Sort by Date (Newest first)</string>
 </resources>
