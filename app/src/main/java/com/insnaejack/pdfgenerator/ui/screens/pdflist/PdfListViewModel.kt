@@ -1,6 +1,7 @@
 package com.insnaejack.pdfgenerator.ui.screens.pdflist
 
 import android.app.Application
+import android.util.Log // Add Log import
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,6 +39,8 @@ sealed class DisplayItem {
 class PdfListViewModel @Inject constructor(
     private val application: Application,
 ) : ViewModel() {
+
+    private val TAG = "PdfListViewModel" // Tag for logging
 
     // State for the current logical path
     private val _currentPath = MutableStateFlow("/")
@@ -192,23 +195,32 @@ class PdfListViewModel @Inject constructor(
     // Update deletePdfFile to modify _allPdfFiles
     fun deletePdfFile(fileToDelete: ManagedPdfFile) {
         viewModelScope.launch {
+            _error.value = null // Clear previous errors
             try {
                 val file = File(fileToDelete.filePath)
                 if (file.exists()) {
+                    Log.i(TAG, "Attempting to delete file: ${fileToDelete.filePath}")
                     if (file.delete()) {
+                        Log.i(TAG, "Successfully deleted file: ${fileToDelete.filePath}")
                         // Refresh the list by removing from _allPdfFiles
                         _allPdfFiles.value = _allPdfFiles.value.filterNot { it.filePath == fileToDelete.filePath }
                         // displayedItems will update automatically via the combine flow
                     } else {
-                        _error.value = "Failed to delete file: ${fileToDelete.name}"
+                        Log.w(TAG, "System returned false for delete operation on: ${fileToDelete.filePath}")
+                        _error.value = "Could not delete file: ${fileToDelete.name}. Operation failed."
                     }
                 } else {
-                    _error.value = "File not found: ${fileToDelete.name}"
-                    // Also remove from list if it's somehow there but doesn't exist
+                    Log.w(TAG, "File to delete not found: ${fileToDelete.filePath}")
+                    _error.value = "File not found: ${fileToDelete.name}. It might have been already deleted."
+                    // Also remove from list if it's somehow there but doesn't exist physically
                     _allPdfFiles.value = _allPdfFiles.value.filterNot { it.filePath == fileToDelete.filePath }
                 }
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException deleting file ${fileToDelete.filePath}", e)
+                _error.value = "Permission denied while deleting file: ${fileToDelete.name}"
             } catch (e: Exception) {
-                _error.value = "Error deleting file ${fileToDelete.name}: ${e.message}"
+                Log.e(TAG, "Exception deleting file ${fileToDelete.filePath}", e)
+                _error.value = "Error deleting file ${fileToDelete.name}: ${e.localizedMessage ?: "Unknown error"}"
             }
         }
     }
@@ -251,23 +263,36 @@ class PdfListViewModel @Inject constructor(
             }
 
             try {
+                Log.i(TAG, "Attempting to rename '${fileToRename.filePath}' to '${newPhysicalFile.absolutePath}'")
                 if (oldFile.renameTo(newPhysicalFile)) {
+                    Log.i(TAG, "Successfully renamed file.")
                     // Update the specific item in _allPdfFiles
                     _allPdfFiles.value = _allPdfFiles.value.map {
                         if (it.filePath == fileToRename.filePath) {
-                            it.copy(name = newName, filePath = newPhysicalFile.absolutePath) // Update name and physical path
+                            // Update name, physical path, URI and potentially lastModified/size if needed
+                            val newUri = FileProvider.getUriForFile(application, "${application.packageName}.provider", newPhysicalFile)
+                            it.copy(
+                                name = newName,
+                                filePath = newPhysicalFile.absolutePath,
+                                uri = newUri,
+                                size = newPhysicalFile.length(),
+                                lastModified = newPhysicalFile.lastModified(),
+                            )
                         } else {
                             it
                         }
                     }
                     // displayedItems will update automatically
                 } else {
-                    _error.value = "Failed to rename physical file: ${fileToRename.name}"
+                    Log.w(TAG, "System returned false for rename operation on: ${fileToRename.filePath}")
+                    _error.value = "Could not rename file: ${fileToRename.name}. Operation failed."
                 }
             } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException renaming file ${fileToRename.filePath}", e)
                 _error.value = "Permission denied while renaming file: ${e.message}"
             } catch (e: Exception) {
-                _error.value = "Error renaming file ${fileToRename.name}: ${e.message}"
+                Log.e(TAG, "Exception renaming file ${fileToRename.filePath}", e)
+                _error.value = "Error renaming file ${fileToRename.name}: ${e.localizedMessage ?: "Unknown error"}"
             }
         }
     }
