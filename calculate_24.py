@@ -1,11 +1,13 @@
 import itertools
 import operator
+import sys
 
 def solve24(nums):
     """
-    Attempts to find an arithmetic expression using the numbers in nums
-    that evaluates to 24.
+    Finds all arithmetic expressions using the numbers in nums
+    that evaluate to 24.
     """
+    solutions = [] # List to store all found solutions
     ops = {
         '+': operator.add,
         '-': operator.sub,
@@ -24,7 +26,7 @@ def solve24(nums):
                 val1 = ops[op_perm[0]](num_perm[0], num_perm[1])
                 val2 = ops[op_perm[2]](num_perm[2], num_perm[3])
                 if abs(ops[op_perm[1]](val1, val2) - 24) < 1e-6: # Use tolerance for float comparison
-                    return f"({num_perm[0]} {op_perm[0]} {num_perm[1]}) {op_perm[1]} ({num_perm[2]} {op_perm[2]} {num_perm[3]}) = 24"
+                    solutions.append(f"({int(num_perm[0])} {op_perm[0]} {int(num_perm[1])}) {op_perm[1]} ({int(num_perm[2])} {op_perm[2]} {int(num_perm[3])}) = 24")
             except ZeroDivisionError:
                 pass
 
@@ -33,7 +35,7 @@ def solve24(nums):
                 val1 = ops[op_perm[0]](num_perm[0], num_perm[1])
                 val2 = ops[op_perm[1]](val1, num_perm[2])
                 if abs(ops[op_perm[2]](val2, num_perm[3]) - 24) < 1e-6:
-                    return f"(({num_perm[0]} {op_perm[0]} {num_perm[1]}) {op_perm[1]} {num_perm[2]}) {op_perm[2]} {num_perm[3]} = 24"
+                    solutions.append(f"(({int(num_perm[0])} {op_perm[0]} {int(num_perm[1])}) {op_perm[1]} {int(num_perm[2])}) {op_perm[2]} {int(num_perm[3])} = 24")
             except ZeroDivisionError:
                 pass
 
@@ -42,7 +44,7 @@ def solve24(nums):
                 val1 = ops[op_perm[1]](num_perm[1], num_perm[2])
                 val2 = ops[op_perm[2]](val1, num_perm[3])
                 if abs(ops[op_perm[0]](num_perm[0], val2) - 24) < 1e-6:
-                     return f"{num_perm[0]} {op_perm[0]} (({num_perm[1]} {op_perm[1]} {num_perm[2]}) {op_perm[2]} {num_perm[3]}) = 24"
+                     solutions.append(f"{int(num_perm[0])} {op_perm[0]} (({int(num_perm[1])} {op_perm[1]} {int(num_perm[2])}) {op_perm[2]} {int(num_perm[3])}) = 24")
             except ZeroDivisionError:
                 pass
 
@@ -51,7 +53,7 @@ def solve24(nums):
                 val1 = ops[op_perm[1]](num_perm[1], num_perm[2])
                 val2 = ops[op_perm[0]](num_perm[0], val1)
                 if abs(ops[op_perm[2]](val2, num_perm[3]) - 24) < 1e-6:
-                    return f"({num_perm[0]} {op_perm[0]} ({num_perm[1]} {op_perm[1]} {num_perm[2]})) {op_perm[2]} {num_perm[3]} = 24"
+                    solutions.append(f"({int(num_perm[0])} {op_perm[0]} ({int(num_perm[1])} {op_perm[1]} {int(num_perm[2])})) {op_perm[2]} {int(num_perm[3])} = 24")
             except ZeroDivisionError:
                 pass
 
@@ -60,13 +62,29 @@ def solve24(nums):
                 val1 = ops[op_perm[2]](num_perm[2], num_perm[3])
                 val2 = ops[op_perm[1]](num_perm[1], val1)
                 if abs(ops[op_perm[0]](num_perm[0], val2) - 24) < 1e-6:
-                    return f"{num_perm[0]} {op_perm[0]} ({num_perm[1]} {op_perm[1]} ({num_perm[2]} {op_perm[2]} {num_perm[3]})) = 24"
+                    solutions.append(f"{int(num_perm[0])} {op_perm[0]} ({int(num_perm[1])} {op_perm[1]} ({int(num_perm[2])} {op_perm[2]} {int(num_perm[3])})) = 24")
             except ZeroDivisionError:
                 pass
 
-    return "No solution found."
+    # Return unique solutions
+    return list(set(solutions))
 
-# Numbers provided by the user
-numbers = [5, 5, 5, 1]
-solution = solve24(numbers)
-print(solution)
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Usage: python calculate_24.py num1 num2 num3 num4")
+        sys.exit(1)
+
+    try:
+        # Convert arguments to numbers (float allows for division results)
+        numbers = [float(arg) for arg in sys.argv[1:]]
+    except ValueError:
+        print("Error: All arguments must be numbers.")
+        sys.exit(1)
+
+    found_solutions = solve24(numbers)
+    if found_solutions:
+        print("Found solutions:")
+        for sol in found_solutions:
+            print(sol)
+    else:
+        print("No solution found.")
