@@ -1,0 +1,117 @@
+<resources>
+    <string name="app_name">Generador de PDF</string>
+
+    <!-- MainActivity & UI related -->
+    <string name="action_settings">Ajustes</string>
+    <string name="title_activity_main">Generador de PDF</string>
+    <string name="take_photo">Tomar Foto</string>
+    <string name="select_from_gallery">Seleccionar de Galería</string>
+    <string name="create_pdf">Crear PDF</string>
+    <string name="creating_pdf">Creando PDF...</string>
+    <string name="pdf_created_successfully">PDF creado con éxito en %s</string>
+    <string name="error_creating_pdf">Error al crear PDF: %s</string>
+    <string name="no_images_selected">No hay imágenes seleccionadas.</string>
+    <string name="selected_images_count">%d imágenes seleccionadas</string>
+    <string name="preview_image">Vista Previa de Imagen</string>
+    <string name="remove_image">Eliminar Imagen</string>
+    <string name="add_image">Añadir Imagen</string>
+
+    <!-- Permissions -->
+    <string name="permission_camera_rationale">Se necesita permiso de cámara para tomar fotos para la creación de PDF.</string>
+    <string name="permission_storage_rationale">Se necesita permiso de almacenamiento para seleccionar imágenes y guardar PDFs.</string>
+    <string name="permission_denied">Permiso denegado. Algunas funciones podrían no funcionar.</string>
+    <string name="grant_permission">Otorgar Permiso</string>
+
+    <!-- In-App Purchase -->
+    <string name="upgrade_to_premium">Actualizar a Premium</string>
+    <string name="premium_features_title">Desbloquear Funciones Premium</string>
+    <string name="feature_high_quality_pdf">PDFs de Alta Calidad</string>
+    <string name="feature_cloud_import">Importar desde la Nube (Google Drive, Dropbox)</string>
+    <string name="feature_custom_pdf_settings">Ajustes de PDF Personalizados (Tamaño de Página, Orientación, Compresión)</string>
+    <string name="feature_ad_free">Experiencia Sin Anuncios</string>
+    <string name="purchase">Comprar</string>
+    <string name="purchase_successful">¡Compra exitosa! Funciones premium desbloqueadas.</string>
+    <string name="purchase_failed">Compra fallida. Por favor, inténtalo de nuevo.</string>
+    <string name="purchase_pending">Compra pendiente.</string>
+    <string name="already_premium">Ya eres un usuario premium.</string>
+    <string name="restore_purchases">Restaurar Compras</string>
+    <string name="restoring_purchases">Restaurando compras...</string>
+    <string name="no_purchases_to_restore">No se encontraron compras para restaurar.</string>
+    <string name="purchases_restored">Compras restauradas con éxito.</string>
+
+    <!-- PDF Settings (Advanced) -->
+    <string name="pdf_settings_title">Ajustes de PDF</string>
+    <string name="page_size">Tamaño de Página</string>
+    <string name="orientation">Orientación</string>
+    <string name="compression_quality">Calidad de Compresión de Imagen</string>
+    <string name="page_size_a4">A4</string>
+    <string name="page_size_letter">Carta</string>
+    <string name="page_size_legal">Legal</string>
+    <string name="orientation_portrait">Vertical</string>
+    <string name="orientation_landscape">Horizontal</string>
+    <string name="quality_high">Alta (Archivo más grande)</string>
+    <string name="quality_medium">Media (Equilibrada)</string>
+    <string name="quality_low">Baja (Archivo más pequeño)</string>
+    <string name="save_settings">Guardar Ajustes</string>
+
+    <!-- Watermark Settings -->
+    <string name="watermark_settings_title">Ajustes de Marca de Agua</string>
+    <string name="enable_watermark">Habilitar Marca de Agua</string>
+    <string name="watermark_text">Texto de Marca de Agua</string>
+    <!-- Cloud Import (Advanced) -->
+    <string name="import_from_google_drive">Importar desde Google Drive</string>
+    <string name="import_from_dropbox">Importar desde Dropbox</string>
+    <string name="connecting_to_cloud">Conectando a %s...</string>
+    <string name="error_cloud_connection">Error al conectar al servicio en la nube.</string>
+    <string name="no_files_found">No se encontraron archivos compatibles.</string>
+
+    <!-- General -->
+    <string name="ok">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="error">Error</string>
+    <string name="loading">Cargando...</string>
+    <string name="coming_soon">Próximamente</string>
+    <string name="share_pdf">Compartir PDF</string>
+    <string name="open_pdf">Abrir PDF</string>
+    <string name="delete_pdf">Eliminar PDF</string>
+    <string name="confirm_delete_pdf_title">Confirmar Eliminación</string>
+    <string name="confirm_delete_pdf_message">¿Estás seguro de que quieres eliminar este PDF?</string>
+
+    <!-- PDF List Screen -->
+    <string name="pdf_list_screen_title">Mis Archivos PDF</string>
+    <string name="pdf_list_empty">No se encontraron archivos PDF. ¡Crea algunos!</string>
+    <string name="share_pdf_title">Compartir PDF vía</string>
+    <string name="share_no_app_found">No se encontró ninguna aplicación para compartir PDF.</string>
+    <string name="view_no_app_found">No se encontró ninguna aplicación para ver PDF.</string>
+    <string name="rename_pdf_dialog_title">Renombrar PDF</string>
+    <string name="rename_pdf_new_name_label">Nuevo nombre de archivo</string>
+    <string name="rename_button">Renombrar</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="more_options_desc">Más opciones</string>
+    <string name="share_action">Compartir</string>
+    <string name="rename_action">Renombrar</string>
+    <string name="delete_action">Eliminar</string>
+    <string name="view_my_pdfs_action">Ver Mis PDFs</string>
+    <string name="back_button_desc">Atrás</string>
+
+    <!-- PDF List Screen - Folder Management -->
+    <string name="up_folder_desc">Navegar Arriba</string>
+    <string name="folder_empty">Esta carpeta está vacía</string>
+    <string name="folder_icon_desc">Carpeta</string>
+    <string name="create_folder_desc">Crear Nueva Carpeta</string>
+    <string name="create_folder_dialog_title">Crear Nueva Carpeta</string>
+    <string name="create_folder_name_label">Nombre de Carpeta</string>
+    <string name="invalid_folder_name">Nombre de carpeta inválido</string>
+    <string name="create_button">Crear</string>
+    <!-- PDF List Screen - Sorting -->
+    <string name="sort_button_desc">Ordenar archivos</string>
+    <string name="sort_by_name_asc">Ordenar por Nombre (A-Z)</string>
+    <string name="sort_by_name_desc">Ordenar por Nombre (Z-A)</string>
+    <string name="sort_by_date_asc">Ordenar por Fecha (Más antiguo primero)</string>
+    <string name="sort_by_date_desc">Ordenar por Fecha (Más nuevo primero)</string>
+    <string name="sort_by_size_asc">Ordenar por Tamaño (Más pequeño primero)</string>
+    <string name="sort_by_size_desc">Ordenar por Tamaño (Más grande primero)</string>
+    <!-- PDF List Screen - Search -->
+    <string name="search_label">Buscar archivos...</string>
+    <string name="search_no_results">Ningún archivo coincide con tu búsqueda</string>
+</resources>
