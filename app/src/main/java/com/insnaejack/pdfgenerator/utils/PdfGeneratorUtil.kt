@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import com.insnaejack.pdfgenerator.model.PdfSettings
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -23,6 +22,25 @@ import java.util.Locale
 object PdfGeneratorUtil {
 
     private const val TAG = "PdfGeneratorUtil"
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        // Raw height and width of image
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        Log.d(TAG, "Calculated inSampleSize: $inSampleSize for reqWidth=$reqWidth, reqHeight=$reqHeight (original: ${width}x$height)")
+        return inSampleSize
+    }
 
     data class PdfCreationResult(
         val success: Boolean,
@@ -51,25 +69,44 @@ object PdfGeneratorUtil {
                     continue // Skips to the next URI in the for-loop
                 }
 
-                val processedSuccessfully = inputStream.use { stream ->
-                    var originalBitmap = BitmapFactory.decodeStream(stream)
-                    if (originalBitmap == null) {
-                        Log.e(TAG, "Failed to decode bitmap from URI: $uri")
-                        return@use false // Signal failure for this URI
-                    }
+                // --- START: Optimized Bitmap Loading ---
+                // 1. Decode bounds to get dimensions without loading full image
+                val options = BitmapFactory.Options()
+                options.inJustDecodeBounds = true
+                var boundsStream = context.contentResolver.openInputStream(uri)
+                if (boundsStream == null) {
+                    Log.e(TAG, "Could not open InputStream for bounds decoding: $uri")
+                    continue // Skip this image
+                }
+                boundsStream.use { BitmapFactory.decodeStream(it, null, options) }
 
-                    // Apply image quality (compression) - this creates a new bitmap
-                    val baos = ByteArrayOutputStream()
-                    originalBitmap.compress(Bitmap.CompressFormat.JPEG, settings.imageQuality.compressionQuality, baos)
-                    val compressedBitmapBytes = baos.toByteArray()
-                    originalBitmap.recycle() // Recycle original after compression
-                    originalBitmap = BitmapFactory.decodeByteArray(compressedBitmapBytes, 0, compressedBitmapBytes.size)
+                // Check if bounds were decoded successfully
+                if (options.outWidth <= 0 || options.outHeight <= 0) {
+                    Log.e(TAG, "Failed to decode image bounds for URI: $uri")
+                    continue // Skip this image
+                }
 
-                    if (originalBitmap == null) {
-                        Log.e(TAG, "Failed to decode bitmap after compression for URI: $uri")
-                        return@use false // Signal failure for this URI
-                    }
+                // 2. Calculate inSampleSize based on target page dimensions (content area)
+                // Use contentWidth/Height as target dimensions for scaling
+                options.inSampleSize = calculateInSampleSize(options, settings.contentWidth, settings.contentHeight)
 
+                // 3. Decode bitmap with inSampleSize set
+                options.inJustDecodeBounds = false
+                var scaledBitmap: Bitmap? = null
+                var decodeStream = context.contentResolver.openInputStream(uri)
+                if (decodeStream == null) {
+                    Log.e(TAG, "Could not re-open InputStream for final decoding: $uri")
+                    continue // Skip this image
+                }
+                decodeStream.use { scaledBitmap = BitmapFactory.decodeStream(it, null, options) }
+
+                if (scaledBitmap == null) {
+                    Log.e(TAG, "Failed to decode scaled bitmap from URI: $uri (inSampleSize: ${options.inSampleSize})")
+                    continue // Skip this image
+                }
+                // --- END: Optimized Bitmap Loading ---
+
+                val processedSuccessfully = try { // Wrap page creation in try-finally for bitmap recycling
                     val pageInfo = PdfDocument.PageInfo.Builder(
                         settings.pageDisplayWidth,
                         settings.pageDisplayHeight,
@@ -82,7 +119,8 @@ object PdfGeneratorUtil {
                     val contentHeight = settings.contentHeight.toFloat()
 
                     // Calculate scaling to fit within content area while maintaining aspect ratio
-                    val bitmapRect = RectF(0f, 0f, originalBitmap.width.toFloat(), originalBitmap.height.toFloat())
+                    // Use scaledBitmap dimensions here
+                    val bitmapRect = RectF(0f, 0f, scaledBitmap!!.width.toFloat(), scaledBitmap!!.height.toFloat())
                     val contentRect = RectF(0f, 0f, contentWidth, contentHeight)
                     val matrix = Matrix()
                     matrix.setRectToRect(bitmapRect, contentRect, Matrix.ScaleToFit.CENTER)
@@ -97,7 +135,7 @@ object PdfGeneratorUtil {
                     // Apply the calculated left and top offsets to the matrix
                     matrix.postTranslate(drawLeft, drawTop)
 
-                    canvas.drawBitmap(originalBitmap, matrix, paint)
+                    canvas.drawBitmap(scaledBitmap!!, matrix, paint) // Use scaledBitmap
 
                     // --- START: Draw Watermark ---
                     if (settings.watermarkEnabled && !settings.watermarkText.isNullOrBlank()) {
@@ -124,11 +162,13 @@ object PdfGeneratorUtil {
                     // --- END: Draw Watermark ---
 
                     pdfDocument.finishPage(page)
-                    originalBitmap.recycle()
-                    return@use true // Signal success for this URI
+                    true // Signal success for this page
+                } finally {
+                    scaledBitmap?.recycle() // Recycle the scaled bitmap in a finally block
                 }
 
                 if (!processedSuccessfully) {
+                    Log.w(TAG, "Processing failed for URI: $uri")
                     continue // Skips to the next URI in the for-loop if processing failed
                 }
             } catch (e: Exception) {
